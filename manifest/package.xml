@@ -59,8 +59,6 @@
         <members>Task</members>
         <members>Event</members>
         <members>User</members>
-        <members>UserRole</members>
-        <members>Profile</members>
         <members>Quote</members>
         <members>QuoteLineItem</members>
         <members>Contract</members>
