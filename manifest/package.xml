@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Apex Classes -->
+    <types>
+        <members>*</members>
+        <name>ApexClass</name>
+    </types>
+    
+    <!-- Apex Triggers -->
+    <types>
+        <members>*</members>
+        <name>ApexTrigger</name>
+    </types>
+    
+    <!-- Apex Pages (Visualforce) -->
+    <types>
+        <members>*</members>
+        <name>ApexPage</name>
+    </types>
+    
+    <!-- Apex Components (Visualforce) -->
+    <types>
+        <members>*</members>
+        <name>ApexComponent</name>
+    </types>
+    
+    <!-- Lightning Web Components -->
+    <types>
+        <members>*</members>
+        <name>LightningComponentBundle</name>
+    </types>
+    
+    <!-- Aura Components -->
+    <types>
+        <members>*</members>
+        <name>AuraDefinitionBundle</name>
+    </types>
+    
+    <!-- Custom Objects -->
+    <types>
+        <members>*</members>
+        <name>CustomObject</name>
+    </types>
+    
+    <!-- Standard Objects (Main Sales Cloud Objects) -->
+    <types>
+        <members>Account</members>
+        <members>Activity</members>
+        <members>Contact</members>
+        <members>Lead</members>
+        <members>Opportunity</members>
+        <members>Case</members>
+        <members>Product2</members>
+        <members>Pricebook2</members>
+        <members>PricebookEntry</members>
+        <members>OpportunityLineItem</members>
+        <members>Campaign</members>
+        <members>CampaignMember</members>
+        <members>Task</members>
+        <members>Event</members>
+        <members>User</members>
+        <members>UserRole</members>
+        <members>Profile</members>
+        <members>Quote</members>
+        <members>QuoteLineItem</members>
+        <members>Contract</members>
+        <members>Order</members>
+        <members>OrderItem</members>
+        <members>Asset</members>
+        <members>Case</members>
+        <members>*</members>
+        <name>CustomObject</name>
+    </types>
+    
+    <!-- Layouts -->
+    <types>
+        <members>*</members>
+        <name>Layout</name>
+    </types>
+    
+    <!-- Record Types -->
+    <types>
+        <members>*</members>
+        <name>RecordType</name>
+    </types>
+    
+    <!-- Business Processes -->
+    <types>
+        <members>*</members>
+        <name>BusinessProcess</name>
+    </types>
+    
+    <!-- Flows -->
+    <types>
+        <members>*</members>
+        <name>Flow</name>
+    </types>
+    
+    <!-- Custom Tabs -->
+    <types>
+        <members>*</members>
+        <name>CustomTab</name>
+    </types>
+    
+    <!-- Flexipages (Lightning Pages) -->
+    <types>
+        <members>*</members>
+        <name>FlexiPage</name>
+    </types>
+    
+    <!-- Permission Sets -->
+    <types>
+        <members>*</members>
+        <name>PermissionSet</name>
+    </types>
+    
+    <!-- Permission Set Groups -->
+    <types>
+        <members>*</members>
+        <name>PermissionSetGroup</name>
+    </types>
+    
+    <!-- Roles -->
+    <types>
+        <members>*</members>
+        <name>Role</name>
+    </types>
+    
+    <!-- Static Resources -->
+    <types>
+        <members>*</members>
+        <name>StaticResource</name>
+    </types>
+    
+    <!-- Custom Labels -->
+    <types>
+        <members>*</members>
+        <name>CustomLabels</name>
+    </types>
+    
+    <!-- Custom Metadata Types -->
+    <types>
+        <members>*</members>
+        <name>CustomMetadata</name>
+    </types>
+    
+    <!-- Email Templates -->
+    <types>
+        <members>*</members>
+        <name>EmailTemplate</name>
+    </types>
+        
+    <!-- Report Types -->
+    <types>
+        <members>*</members>
+        <name>ReportType</name>
+    </types>
+    
+    <!-- Custom Permissions -->
+    <types>
+        <members>*</members>
+        <name>CustomPermission</name>
+    </types>
+    
+    <!-- Connected Apps -->
+    <types>
+        <members>*</members>
+        <name>ConnectedApp</name>
+    </types>
+    
+    <!-- Remote Site Settings -->
+    <types>
+        <members>*</members>
+        <name>RemoteSiteSetting</name>
+    </types>
+    
+    <!-- Named Credentials -->
+    <types>
+        <members>*</members>
+        <name>NamedCredential</name>
+    </types>
+    
+    <!-- External Credentials -->
+    <types>
+        <members>*</members>
+        <name>ExternalCredential</name>
+    </types>
+    
+    <!-- Platform Events -->
+    <types>
+        <members>*</members>
+        <name>PlatformEventChannel</name>
+    </types>
+    
+    <!-- Custom Notification Types -->
+    <types>
+        <members>*</members>
+        <name>CustomNotificationType</name>
+    </types>
+    
+    <!-- Lightning Message Channels -->
+    <types>
+        <members>*</members>
+        <name>LightningMessageChannel</name>
+    </types>
+    
+    <!-- Content Assets -->
+    <types>
+        <members>*</members>
+        <name>ContentAsset</name>
+    </types>
+    
+    <!-- Document -->
+    <types>
+        <members>*</members>
+        <name>Document</name>
+    </types>
+    
+    <!-- Assignment Rules -->
+    <types>
+        <members>*</members>
+        <name>AssignmentRules</name>
+    </types>
+    
+    <!-- Auto Response Rules -->
+    <types>
+        <members>*</members>
+        <name>AutoResponseRules</name>
+    </types>
+    
+    <!-- Escalation Rules -->
+    <types>
+        <members>*</members>
+        <name>EscalationRules</name>
+    </types>
+    
+    <!-- Queues -->
+    <types>
+        <members>*</members>
+        <name>Queue</name>
+    </types>
+    
+    <!-- Groups -->
+    <types>
+        <members>*</members>
+        <name>Group</name>
+    </types>
+    
+    <!-- Duplicate Rules -->
+    <types>
+        <members>*</members>
+        <name>DuplicateRule</name>
+    </types>
+    
+    <!-- Matching Rules -->
+    <types>
+        <members>*</members>
+        <name>MatchingRules</name>
+    </types>
+    
+    <!-- Approval Processes -->
+    <types>
+        <members>*</members>
+        <name>ApprovalProcess</name>
+    </types>
+    
+    <!-- Global Value Sets -->
+    <types>
+        <members>*</members>
+        <name>GlobalValueSet</name>
+    </types>
+    
+    <!-- Standard Value Sets -->
+    <types>
+        <members>AccountContactMultipleRoles</members>
+        <members>AccountContactRole</members>
+        <members>AccountOwnership</members>
+        <members>AccountRating</members>
+        <members>AccountType</members>
+        <members>AssetStatus</members>
+        <members>CampaignMemberStatus</members>
+        <members>CampaignStatus</members>
+        <members>CampaignType</members>
+        <members>CaseContactRole</members>
+        <members>CaseOrigin</members>
+        <members>CasePriority</members>
+        <members>CaseReason</members>
+        <members>CaseStatus</members>
+        <members>CaseType</members>
+        <members>ContractContactRole</members>
+        <members>ContractStatus</members>
+        <members>Industry</members>
+        <members>LeadSource</members>
+        <members>LeadStatus</members>
+        <members>OpportunityCompetitor</members>
+        <members>OpportunityStage</members>
+        <members>OpportunityType</members>
+        <members>PartnerRole</members>
+        <members>Product2Family</members>
+        <members>QuoteStatus</members>
+        <members>SalesTeamRole</members>
+        <members>Salutation</members>
+        <members>TaskPriority</members>
+        <members>TaskStatus</members>
+        <members>TaskSubject</members>
+        <members>TaskType</members>
+        <members>WorkOrderLineItemStatus</members>
+        <members>WorkOrderPriority</members>
+        <members>WorkOrderStatus</members>
+        <name>StandardValueSet</name>
+    </types>
+    
+    <version>65.0</version>
+</Package>
