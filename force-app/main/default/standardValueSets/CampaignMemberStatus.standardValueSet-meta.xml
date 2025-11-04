@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<StandardValueSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <sorted>true</sorted>
+    <standardValue>
+        <fullName>Added</fullName>
+        <default>false</default>
+        <label>Added</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Confirmed</fullName>
+        <default>false</default>
+        <label>Confirmed</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Droped</fullName>
+        <default>false</default>
+        <label>Droped</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Pending Dinner Time</fullName>
+        <default>false</default>
+        <label>Pending Dinner Time</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Responded</fullName>
+        <default>false</default>
+        <label>Responded</label>
+    </standardValue>
+    <standardValue>
+        <fullName>Sent</fullName>
+        <default>false</default>
+        <label>Sent</label>
+    </standardValue>
+</StandardValueSet>

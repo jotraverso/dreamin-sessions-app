@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Queue xmlns="http://soap.sforce.com/2006/04/metadata">
+    <doesSendEmailToMembers>false</doesSendEmailToMembers>
+    <name>Email Cases</name>
+    <queueMembers>
+        <users>
+            <user>ccampillogallego@dreamole.es</user>
+            <user>insightsintegration@00drr00000grrq82aj.ext</user>
+            <user>jotraverso@dreamole.es</user>
+            <user>juliodiegobf@dreamole.es</user>
+            <user>apelmolina@dreamole.es</user>
+            <user>candyvf13@dreamole.es</user>
+        </users>
+    </queueMembers>
+    <queueSobject>
+        <sobjectType>Case</sobjectType>
+    </queueSobject>
+</Queue>
