@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PercentComplete__c</fullName>
+    <label>% Complete</label>
+    <type>Percent</type>
+    <formula>IF(
+  OR(ISBLANK(TargetSessionCount__c), TargetSessionCount__c = 0),
+  0,
+  SubmittedCount__c / TargetSessionCount__c
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <precision>18</precision>
+    <scale>2</scale>
+</CustomField>
