@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AllSessionEvaluations</fullName>
+    <columns>NAME</columns>
+    <columns>Session__c</columns>
+    <columns>Status__c</columns>
+    <columns>ClarityScore__c</columns>
+    <columns>DiversityScore__c</columns>
+    <columns>EngagementScore__c</columns>
+    <columns>TotalScore__c</columns>
+    <columns>Flagged__c</columns>
+    <columns>SubmittedDate__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Session Evaluations</label>
+</ListView>

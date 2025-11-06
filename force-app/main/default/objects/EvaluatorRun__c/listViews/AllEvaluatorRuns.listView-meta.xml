@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AllEvaluatorRuns</fullName>
+    <columns>NAME</columns>
+    <columns>Campaign__c</columns>
+    <columns>Evaluator__c</columns>
+    <columns>Status__c</columns>
+    <columns>Active__c</columns>
+    <columns>TargetSessionCount__c</columns>
+    <columns>TotalAssigned__c</columns>
+    <columns>SubmittedCount__c</columns>
+    <columns>PercentComplete__c</columns>
+    <columns>StartedAt__c</columns>
+    <filterScope>Everything</filterScope>
+    <label>All Evaluator Runs</label>
+</ListView>
