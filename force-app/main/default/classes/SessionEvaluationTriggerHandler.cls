@@ -26,6 +26,7 @@ public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler
    */
   public override void afterInsert() {
     handleEvaluationSubmission(this.newRecords, null);
+    updateEvaluatorRunCountsOnChange(this.newRecords, null);
   }
 
   /**
@@ -33,6 +34,21 @@ public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler
    */
   public override void afterUpdate() {
     handleEvaluationSubmission(this.newRecords, this.oldRecordsMap);
+    updateEvaluatorRunCountsOnChange(this.newRecords, this.oldRecordsMap);
+  }
+
+  /**
+   * @description After delete handler - updates counts when evaluations are deleted
+   */
+  public override void afterDelete() {
+    updateEvaluatorRunCountsOnChange(this.oldRecords, null);
+  }
+
+  /**
+   * @description After undelete handler - updates counts when evaluations are restored
+   */
+  public override void afterUndelete() {
+    updateEvaluatorRunCountsOnChange(this.newRecords, null);
   }
 
   /**
@@ -104,6 +120,171 @@ public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler
 
     if (!runsToUpdate.isEmpty()) {
       update runsToUpdate;
+    }
+  }
+
+  /**
+   * @description Updates all counters on EvaluatorRun when evaluations change
+   * Maintains TotalAssigned, SubmittedCount, and FlaggedCount
+   * @param evaluations List of evaluations that changed
+   * @param oldEvaluationsMap Map of old evaluation records (null for insert/undelete)
+   */
+  private void updateEvaluatorRunCountsOnChange(
+    List<SessionEvaluation__c> evaluations,
+    Map<Id, SessionEvaluation__c> oldEvaluationsMap
+  ) {
+    Set<Id> runIds = collectAffectedRunIds(evaluations, oldEvaluationsMap);
+
+    if (runIds.isEmpty()) {
+      return;
+    }
+
+    Map<Id, EvaluatorRun__c> runsToUpdate = calculateRunCounts(runIds);
+
+    if (
+      !runsToUpdate.isEmpty() &&
+      EvaluatorRun__c.SObjectType.getDescribe().isUpdateable()
+    ) {
+      update runsToUpdate.values();
+    }
+  }
+
+  /**
+   * @description Collects all EvaluatorRun IDs affected by evaluation changes
+   * @param evaluations List of evaluations that changed
+   * @param oldEvaluationsMap Map of old evaluation records
+   * @return Set of affected run IDs
+   */
+  private Set<Id> collectAffectedRunIds(
+    List<SessionEvaluation__c> evaluations,
+    Map<Id, SessionEvaluation__c> oldEvaluationsMap
+  ) {
+    Set<Id> runIds = new Set<Id>();
+
+    // Collect current run IDs
+    for (SessionEvaluation__c evaluation : evaluations) {
+      if (evaluation.Run__c != null) {
+        runIds.add(evaluation.Run__c);
+      }
+    }
+
+    // Include previous run IDs if evaluations were reparented
+    if (oldEvaluationsMap != null) {
+      for (SessionEvaluation__c evaluation : evaluations) {
+        SessionEvaluation__c oldEval = oldEvaluationsMap.get(evaluation.Id);
+        if (
+          oldEval != null &&
+          oldEval.Run__c != null &&
+          oldEval.Run__c != evaluation.Run__c
+        ) {
+          runIds.add(oldEval.Run__c);
+        }
+      }
+    }
+
+    return runIds;
+  }
+
+  /**
+   * @description Calculates all count fields for the given runs
+   * @param runIds Set of EvaluatorRun IDs to calculate counts for
+   * @return Map of EvaluatorRun records with updated counts
+   */
+  private Map<Id, EvaluatorRun__c> calculateRunCounts(Set<Id> runIds) {
+    Map<Id, EvaluatorRun__c> runsToUpdate = initializeRunCounts(runIds);
+
+    // Verify read access before querying
+    if (!SessionEvaluation__c.SObjectType.getDescribe().isAccessible()) {
+      return runsToUpdate;
+    }
+
+    aggregateTotalAssigned(runIds, runsToUpdate);
+    aggregateSubmittedCount(runIds, runsToUpdate);
+    aggregateFlaggedCount(runIds, runsToUpdate);
+
+    return runsToUpdate;
+  }
+
+  /**
+   * @description Initializes EvaluatorRun records with zero counts
+   * @param runIds Set of run IDs to initialize
+   * @return Map of initialized runs
+   */
+  private Map<Id, EvaluatorRun__c> initializeRunCounts(Set<Id> runIds) {
+    Map<Id, EvaluatorRun__c> runsMap = new Map<Id, EvaluatorRun__c>();
+
+    for (Id runId : runIds) {
+      runsMap.put(
+        runId,
+        new EvaluatorRun__c(
+          Id = runId,
+          TotalAssigned__c = 0,
+          SubmittedCount__c = 0,
+          FlaggedCount__c = 0
+        )
+      );
+    }
+
+    return runsMap;
+  }
+
+  /**
+   * @description Aggregates total assigned count for runs
+   * @param runIds Set of run IDs
+   * @param runsMap Map to update with counts
+   */
+  private void aggregateTotalAssigned(
+    Set<Id> runIds,
+    Map<Id, EvaluatorRun__c> runsMap
+  ) {
+    for (AggregateResult ar : [
+      SELECT Run__c, COUNT(Id) totalCount
+      FROM SessionEvaluation__c
+      WHERE Run__c IN :runIds
+      GROUP BY Run__c
+    ]) {
+      Id runId = (Id) ar.get('Run__c');
+      runsMap.get(runId).TotalAssigned__c = (Integer) ar.get('totalCount');
+    }
+  }
+
+  /**
+   * @description Aggregates submitted count for runs
+   * @param runIds Set of run IDs
+   * @param runsMap Map to update with counts
+   */
+  private void aggregateSubmittedCount(
+    Set<Id> runIds,
+    Map<Id, EvaluatorRun__c> runsMap
+  ) {
+    for (AggregateResult ar : [
+      SELECT Run__c, COUNT(Id) submittedCount
+      FROM SessionEvaluation__c
+      WHERE Run__c IN :runIds AND Status__c = 'Submitted'
+      GROUP BY Run__c
+    ]) {
+      Id runId = (Id) ar.get('Run__c');
+      runsMap.get(runId).SubmittedCount__c = (Integer) ar.get('submittedCount');
+    }
+  }
+
+  /**
+   * @description Aggregates flagged count for runs
+   * @param runIds Set of run IDs
+   * @param runsMap Map to update with counts
+   */
+  private void aggregateFlaggedCount(
+    Set<Id> runIds,
+    Map<Id, EvaluatorRun__c> runsMap
+  ) {
+    for (AggregateResult ar : [
+      SELECT Run__c, COUNT(Id) flaggedCount
+      FROM SessionEvaluation__c
+      WHERE Run__c IN :runIds AND Flagged__c = TRUE
+      GROUP BY Run__c
+    ]) {
+      Id runId = (Id) ar.get('Run__c');
+      runsMap.get(runId).FlaggedCount__c = (Integer) ar.get('flaggedCount');
     }
   }
 }

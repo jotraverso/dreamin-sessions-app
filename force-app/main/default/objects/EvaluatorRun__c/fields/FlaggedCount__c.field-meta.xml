@@ -2,6 +2,10 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>FlaggedCount__c</fullName>
     <label>Flagged Count</label>
+    <description
+  >Number of session evaluations that have been flagged for review. Automatically updated when evaluations are flagged or unflagged.</description>
+    <inlineHelpText
+  >Count of evaluations marked as Flagged. Tracks sessions that require special attention or further review.</inlineHelpText>
     <type>Number</type>
     <precision>4</precision>
     <scale>0</scale>

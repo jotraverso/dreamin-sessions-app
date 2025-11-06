@@ -2,6 +2,10 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>TotalAssigned__c</fullName>
     <label>Total Assigned</label>
+    <description
+  >Total number of session evaluations assigned to this evaluator run. Automatically calculated based on related SessionEvaluation records.</description>
+    <inlineHelpText
+  >The total count of sessions assigned to this evaluator for evaluation.</inlineHelpText>
     <type>Number</type>
     <precision>4</precision>
     <scale>0</scale>
