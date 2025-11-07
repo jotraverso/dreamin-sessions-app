@@ -45,7 +45,7 @@ public class TestDataFactory {
     String name,
     Boolean selected
   ) {
-    return new Session__c(
+    Session__c s = new Session__c(
       Name = name != null ? name : 'Test Session',
       Campaign__c = campaignId,
       Selected__c = selected != null ? selected : false,
@@ -54,6 +54,12 @@ public class TestDataFactory {
       Category__c = 'Development',
       DurationMinutes__c = 60
     );
+    // Ensure required speaker fields are present for test inserts
+    if (s.PrimarySpeakerName__c == null)
+      s.PrimarySpeakerName__c = 'Default Speaker';
+    if (s.PrimarySpeakerEmail__c == null)
+      s.PrimarySpeakerEmail__c = 'speaker@default.test';
+    return s;
   }
 
   /**
@@ -204,15 +210,27 @@ public class TestDataFactory {
       WHERE Name = :profileName
       LIMIT 1
     ];
+    // Build a safe unique username prefix from email (handle missing @)
+    Integer atPos = email != null ? email.indexOf('@') : -1;
+    String namePrefix = atPos > 0
+      ? email.substring(0, atPos)
+      : (email != null ? email : 'user');
+    String uniqueName = namePrefix + System.currentTimeMillis();
 
-    String uniqueName = email.substringBefore('@') + System.currentTimeMillis();
+    // Safe alias: first char of firstName (or 'X') + first up to 4 chars of lastName
+    String aliasFirst = (firstName != null &&
+      firstName.length() > 0)
+      ? firstName.substring(0, 1)
+      : 'X';
+    Integer lastLen = (lastName != null) ? Math.min(4, lastName.length()) : 0;
+    String aliasLast = lastLen > 0 ? lastName.substring(0, lastLen) : 'User';
 
     return new User(
       FirstName = firstName,
       LastName = lastName,
       Email = email,
       Username = uniqueName + '@testorg.com',
-      Alias = firstName.substring(0, 1) + lastName.substring(0, 4),
+      Alias = aliasFirst + aliasLast,
       TimeZoneSidKey = 'America/Los_Angeles',
       LocaleSidKey = 'en_US',
       EmailEncodingKey = 'UTF-8',
