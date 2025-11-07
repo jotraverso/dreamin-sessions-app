@@ -1,0 +1,26 @@
+.evaluation-card {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slds-card {
+  position: relative;
+}
+
+.slds-border_top {
+  border-top: 1px solid #dddbda;
+}
+
+/* Swipe container */
+.swipe-container {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Hide navigation buttons on mobile devices */
+@media only screen and (max-width: 768px) {
+  .nav-buttons-desktop {
+    display: none !important;
+  }
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <masterLabel>Evaluation Progress Channel</masterLabel>
+    <isExposed>true</isExposed>
+    <description>Message channel for evaluation progress updates</description>
+    <lightningMessageFields>
+        <fieldName>evaluationUpdated</fieldName>
+        <description>Indicates an evaluation was updated</description>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <fieldName>runId</fieldName>
+        <description>The EvaluatorRun ID that was updated</description>
+    </lightningMessageFields>
+</LightningMessageChannel>

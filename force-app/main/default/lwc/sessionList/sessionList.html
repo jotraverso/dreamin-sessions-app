@@ -1,0 +1,120 @@
+<template>
+  <lightning-card title="Session Evaluations">
+    <div class="slds-p-around_medium">
+      <!-- Filter Toggle -->
+      <div
+        class="slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center"
+      >
+        <div>
+          <lightning-input
+            type="toggle"
+            label="Filter Non-Submitted Only"
+            checked={showNonSubmittedOnly}
+            onchange={handleToggleFilter}
+          >
+          </lightning-input>
+        </div>
+        <div
+          class="slds-text-body_small slds-text-color_weak slds-m-left_small"
+        >
+          {filterDescription}
+        </div>
+      </div>
+
+      <template if:true={loading}>
+        <lightning-spinner
+          alternative-text="Loading evaluations..."
+        ></lightning-spinner>
+      </template>
+
+      <template if:false={loading}>
+        <template if:true={hasEvaluations}>
+          <!-- Evaluation Card -->
+          <template if:true={currentEvaluation}>
+            <div
+              class="slds-card slds-p-around_medium swipe-container"
+              ontouchstart={handleTouchStart}
+              ontouchmove={handleTouchMove}
+              ontouchend={handleTouchEnd}
+            >
+              <!-- Action Buttons at Top -->
+              <div
+                class="slds-grid slds-grid_align-spread slds-m-bottom_medium"
+              >
+                <!-- Navigation Buttons (Hidden on Mobile) -->
+                <div class="slds-grid slds-gutters_x-small nav-buttons-desktop">
+                  <div class="slds-col">
+                    <lightning-button
+                      icon-name="utility:chevronleft"
+                      label="Previous"
+                      disabled={isFirstEvaluation}
+                      onclick={handlePrevious}
+                    >
+                    </lightning-button>
+                  </div>
+                  <div class="slds-col">
+                    <lightning-button
+                      icon-name="utility:chevronright"
+                      icon-position="right"
+                      label="Next"
+                      disabled={isLastEvaluation}
+                      onclick={handleNext}
+                    >
+                    </lightning-button>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="slds-grid slds-gutters_x-small">
+                  <div class="slds-col">
+                    <lightning-button
+                      variant={flagButtonVariant}
+                      icon-name="utility:warning"
+                      label={flagButtonLabel}
+                      onclick={handleFlag}
+                    >
+                    </lightning-button>
+                  </div>
+                  <div class="slds-col">
+                    <lightning-button
+                      variant="brand"
+                      label="Submit Scores"
+                      onclick={handleSubmit}
+                    >
+                    </lightning-button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Progress Indicator -->
+              <div
+                class="slds-text-align_center slds-m-bottom_small slds-text-color_weak"
+              >
+                Evaluation {currentIndex} of {totalEvaluations}
+              </div>
+
+              <!-- Evaluation Form Component -->
+              <c-evaluation-form
+                evaluation-id={currentEvaluation.Id}
+                evaluation={currentEvaluation}
+              >
+              </c-evaluation-form>
+            </div>
+          </template>
+        </template>
+
+        <template if:false={hasEvaluations}>
+          <div class="slds-text-align_center slds-p-around_large">
+            <p class="slds-text-heading_small">No evaluations available</p>
+          </div>
+        </template>
+      </template>
+
+      <template if:true={error}>
+        <div class="slds-m-top_small">
+          <p class="slds-text-color_error">{error}</p>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

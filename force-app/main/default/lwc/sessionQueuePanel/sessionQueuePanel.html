@@ -1,0 +1,58 @@
+<template>
+  <lightning-card title="My Evaluation Progress">
+    <div class="slds-p-around_medium">
+      <template if:true={progress}>
+        <div class="slds-grid slds-gutters">
+          <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-align_center">
+              <div class="slds-text-heading_large">
+                {progress.submittedCount}
+              </div>
+              <div class="slds-text-body_small">Submitted</div>
+            </div>
+          </div>
+          <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-align_center">
+              <div class="slds-text-heading_large">{progress.targetCount}</div>
+              <div class="slds-text-body_small">Total</div>
+            </div>
+          </div>
+          <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-align_center">
+              <div class="slds-text-heading_large">{progress.flaggedCount}</div>
+              <div class="slds-text-body_small">Flagged</div>
+            </div>
+          </div>
+          <div class="slds-col slds-size_1-of-4">
+            <div class="slds-text-align_center">
+              <div class="slds-text-heading_large">
+                {percentCompleteDisplay}%
+              </div>
+              <div class="slds-text-body_small">Complete</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="slds-m-top_medium">
+          <lightning-progress-bar value={progress.percentComplete} size="large">
+          </lightning-progress-bar>
+        </div>
+
+        <template if:true={isComplete}>
+          <div class="slds-m-top_medium slds-text-align_center">
+            <lightning-button
+              variant="brand"
+              label="Finalize My Evaluations"
+              onclick={handleFinalize}
+            >
+            </lightning-button>
+          </div>
+        </template>
+      </template>
+
+      <template if:true={error}>
+        <p class="slds-text-color_error">{error}</p>
+      </template>
+    </div>
+  </lightning-card>
+</template>

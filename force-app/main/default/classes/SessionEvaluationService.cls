@@ -296,6 +296,127 @@ public with sharing class SessionEvaluationService {
   }
 
   /**
+   * @description Get session evaluations for review
+   * @param runId EvaluatorRun ID (optional - if not provided, returns for current user)
+   * @return List of SessionEvaluation records with Session details
+   */
+  @AuraEnabled
+  public static List<SessionEvaluation__c> getSessionEvaluations(Id runId) {
+    Id userId = UserInfo.getUserId();
+
+    if (runId != null) {
+      return [
+        SELECT
+          Id,
+          Session__c,
+          Session__r.Title__c,
+          Session__r.Abstract__c,
+          Session__r.Level__c,
+          Session__r.Category__c,
+          Session__r.DurationMinutes__c,
+          ClarityScore__c,
+          DiversityScore__c,
+          EngagementScore__c,
+          TotalScore__c,
+          Comments__c,
+          Flagged__c,
+          Status__c,
+          SubmittedDate__c
+        FROM SessionEvaluation__c
+        WHERE Run__c = :runId
+        ORDER BY SubmittedDate__c ASC NULLS LAST
+      ];
+    } else {
+      // Return empty list if no runId provided
+      return new List<SessionEvaluation__c>();
+    }
+  }
+
+  /**
+   * @description Update evaluation scores and flag status
+   * @param evaluationId Evaluation record ID
+   * @param clarity Clarity score
+   * @param diversity Diversity score
+   * @param engagement Engagement score
+   * @param comments Comments
+   * @param flagged Flag status
+   */
+  @AuraEnabled(cacheable=false)
+  public static void updateEvaluationScores(
+    Id evaluationId,
+    Integer clarity,
+    Integer diversity,
+    Integer engagement,
+    String comments,
+    Boolean flagged
+  ) {
+    SessionEvaluation__c eval = [
+      SELECT Id, Status__c, FinalizedSnapshot__c, Run__c
+      FROM SessionEvaluation__c
+      WHERE Id = :evaluationId
+      FOR UPDATE
+    ];
+
+    if (eval.FinalizedSnapshot__c) {
+      throw new AuraHandledException('Cannot modify finalized evaluation');
+    }
+
+    eval.ClarityScore__c = clarity;
+    eval.DiversityScore__c = diversity;
+    eval.EngagementScore__c = engagement;
+    eval.Comments__c = comments;
+    eval.Flagged__c = flagged;
+
+    // Set status based on flag status
+    if (flagged) {
+      eval.Status__c = 'Draft';
+    } else {
+      eval.Status__c = 'Submitted';
+      eval.SubmittedDate__c = System.now();
+      // Only validate score ranges when not flagged (submitting)
+      validateScoreRanges(eval);
+    }
+
+    update eval;
+
+    // Update run counts
+    if (eval.Run__c != null) {
+      updateRunCounts(eval.Run__c);
+    }
+  }
+
+  /**
+   * @description Get evaluator progress summary by run ID
+   * @param runId EvaluatorRun ID
+   * @return Map with progress metrics
+   */
+  @AuraEnabled(cacheable=true)
+  public static Map<String, Object> getEvaluatorProgressByRun(Id runId) {
+    EvaluatorRun__c run = [
+      SELECT
+        Id,
+        TargetSessionCount__c,
+        SubmittedCount__c,
+        FlaggedCount__c,
+        PercentComplete__c,
+        Status__c
+      FROM EvaluatorRun__c
+      WHERE Id = :runId
+      LIMIT 1
+    ];
+
+    Map<String, Object> result = new Map<String, Object>();
+    result.put('runId', run.Id);
+    result.put('targetCount', run.TargetSessionCount__c);
+    result.put('submittedCount', run.SubmittedCount__c);
+    result.put('flaggedCount', run.FlaggedCount__c);
+    result.put('percentComplete', run.PercentComplete__c);
+    result.put('status', run.Status__c);
+
+    return result;
+  }
+
+  /**
    * @description Get evaluator progress summary
    * @param campaignId Campaign ID
    * @return Map with progress metrics
@@ -367,5 +488,34 @@ public with sharing class SessionEvaluationService {
     Blob b = Crypto.generateAesKey(128);
     String token = EncodingUtil.convertToHex(b);
     return token.substring(0, 32);
+  }
+
+  /**
+   * @description Update EvaluatorRun counts based on current evaluations
+   * @param runId EvaluatorRun ID
+   */
+  private static void updateRunCounts(Id runId) {
+    // Count submitted evaluations
+    Integer submittedCount = [
+      SELECT COUNT()
+      FROM SessionEvaluation__c
+      WHERE Run__c = :runId AND Status__c = 'Submitted'
+    ];
+
+    // Count flagged evaluations
+    Integer flaggedCount = [
+      SELECT COUNT()
+      FROM SessionEvaluation__c
+      WHERE Run__c = :runId AND Flagged__c = TRUE
+    ];
+
+    // Update the run
+    EvaluatorRun__c run = new EvaluatorRun__c(
+      Id = runId,
+      SubmittedCount__c = submittedCount,
+      FlaggedCount__c = flaggedCount
+    );
+
+    update run;
   }
 }

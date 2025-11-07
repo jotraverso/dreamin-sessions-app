@@ -1,0 +1,21 @@
+.evaluation-form {
+  width: 100%;
+}
+
+.slds-form-element {
+  margin-bottom: 1.5rem;
+}
+
+.slds-box {
+  background-color: #fafaf9;
+}
+
+lightning-slider {
+  margin-top: 0.5rem;
+}
+
+.slds-form-element__label {
+  font-weight: bold;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
