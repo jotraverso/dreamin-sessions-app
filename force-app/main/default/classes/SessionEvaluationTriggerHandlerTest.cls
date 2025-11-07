@@ -61,6 +61,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -93,11 +94,13 @@ private class SessionEvaluationTriggerHandlerTest {
       WHERE Run__c = :run.Id AND Status__c = 'Not Started'
       LIMIT 1
     ];
-    existingEval.Status__c = 'Submitted';
-    existingEval.ClarityScore__c = 3;
-    existingEval.DiversityScore__c = 3;
-    existingEval.EngagementScore__c = 3;
-    update existingEval;
+    System.runAs(evaluator) {
+      existingEval.Status__c = 'Submitted';
+      existingEval.ClarityScore__c = 3;
+      existingEval.DiversityScore__c = 3;
+      existingEval.EngagementScore__c = 3;
+      update existingEval;
+    }
     Test.stopTest();
 
     // Then
@@ -132,6 +135,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -143,15 +147,19 @@ private class SessionEvaluationTriggerHandlerTest {
       WHERE Run__c = :run.Id
       LIMIT 1
     ];
-    eval1.Status__c = 'Submitted';
-    eval1.ClarityScore__c = 3;
-    eval1.DiversityScore__c = 3;
-    eval1.EngagementScore__c = 3;
-    update eval1;
+    System.runAs(evaluator) {
+      eval1.Status__c = 'Submitted';
+      eval1.ClarityScore__c = 3;
+      eval1.DiversityScore__c = 3;
+      eval1.EngagementScore__c = 3;
+      update eval1;
+    }
 
     // When - Delete the submitted evaluation
     Test.startTest();
-    delete eval1;
+    System.runAs(evaluator) {
+      delete eval1;
+    }
     Test.stopTest();
 
     // Then - 9 evaluations remain (10 from flow - 1 deleted)
@@ -186,6 +194,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -198,20 +207,24 @@ private class SessionEvaluationTriggerHandlerTest {
       LIMIT 2
     ];
 
-    // Submit first evaluation
-    flowEvals[0].Status__c = 'Submitted';
-    flowEvals[0].ClarityScore__c = 3;
-    flowEvals[0].DiversityScore__c = 3;
-    flowEvals[0].EngagementScore__c = 3;
-    update flowEvals[0];
+    System.runAs(evaluator) {
+      // Submit first evaluation
+      flowEvals[0].Status__c = 'Submitted';
+      flowEvals[0].ClarityScore__c = 3;
+      flowEvals[0].DiversityScore__c = 3;
+      flowEvals[0].EngagementScore__c = 3;
+      update flowEvals[0];
+    }
 
     // When - Submit second evaluation
     Test.startTest();
-    flowEvals[1].Status__c = 'Submitted';
-    flowEvals[1].ClarityScore__c = 3;
-    flowEvals[1].DiversityScore__c = 3;
-    flowEvals[1].EngagementScore__c = 3;
-    update flowEvals[1];
+    System.runAs(evaluator) {
+      flowEvals[1].Status__c = 'Submitted';
+      flowEvals[1].ClarityScore__c = 3;
+      flowEvals[1].DiversityScore__c = 3;
+      flowEvals[1].EngagementScore__c = 3;
+      update flowEvals[1];
+    }
     Test.stopTest();
 
     // Then
@@ -246,24 +259,27 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
 
     // When - Submit all flow-created evaluations
     Test.startTest();
-    List<SessionEvaluation__c> allEvals = [
-      SELECT Id
-      FROM SessionEvaluation__c
-      WHERE Run__c = :run.Id
-    ];
-    for (SessionEvaluation__c e : allEvals) {
-      e.Status__c = 'Submitted';
-      e.ClarityScore__c = 3;
-      e.DiversityScore__c = 3;
-      e.EngagementScore__c = 3;
+    System.runAs(evaluator) {
+      List<SessionEvaluation__c> allEvals = [
+        SELECT Id
+        FROM SessionEvaluation__c
+        WHERE Run__c = :run.Id
+      ];
+      for (SessionEvaluation__c e : allEvals) {
+        e.Status__c = 'Submitted';
+        e.ClarityScore__c = 3;
+        e.DiversityScore__c = 3;
+        e.EngagementScore__c = 3;
+      }
+      update allEvals;
     }
-    update allEvals;
     Test.stopTest();
 
     // Then
@@ -294,40 +310,59 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
-
-    // Verify initial state (flow creates evaluations with Status = 'Not Started')
-    EvaluatorRun__c initialResult = [
-      SELECT TotalAssigned__c, SubmittedCount__c
+    // Check the evaluator run belongs to the evaluator user and is the same user as the Evaluator__c
+    // Query the record to confirm
+    EvaluatorRun__c insertedRun = [
+      SELECT Id, Evaluator__c, OwnerId
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, initialResult.TotalAssigned__c, 'Total should be 10');
     Assert.areEqual(
-      0,
-      initialResult.SubmittedCount__c,
-      'Submitted should be 0'
+      evaluator.Id,
+      insertedRun.Evaluator__c,
+      'Evaluator__c should match evaluator user'
+    );
+    Assert.areEqual(
+      evaluator.Id,
+      insertedRun.OwnerId,
+      'OwnerId should match evaluator user'
     );
 
-    // When - Update 5 to Submitted
     Test.startTest();
-    List<SessionEvaluation__c> evals = [
-      SELECT Id
-      FROM SessionEvaluation__c
-      WHERE Run__c = :run.Id
-      LIMIT 5
-    ];
-    for (SessionEvaluation__c e : evals) {
-      e.Status__c = 'Submitted';
-      e.ClarityScore__c = 3;
-      e.DiversityScore__c = 3;
-      e.EngagementScore__c = 3;
-    }
-    update evals;
-    Test.stopTest();
+    System.runAs(evaluator) {
+      // Verify initial state (flow creates evaluations with Status = 'Not Started')
+      EvaluatorRun__c initialResult = [
+        SELECT TotalAssigned__c, SubmittedCount__c
+        FROM EvaluatorRun__c
+        WHERE Id = :run.Id
+      ];
+      Assert.areEqual(10, initialResult.TotalAssigned__c, 'Total should be 10');
+      Assert.areEqual(
+        0,
+        initialResult.SubmittedCount__c,
+        'Submitted should be 0'
+      );
 
+      // When - Update 5 to Submitted
+      List<SessionEvaluation__c> evals = [
+        SELECT Id
+        FROM SessionEvaluation__c
+        WHERE Run__c = :run.Id
+        LIMIT 5
+      ];
+      for (SessionEvaluation__c e : evals) {
+        e.Status__c = 'Submitted';
+        e.ClarityScore__c = 3;
+        e.DiversityScore__c = 3;
+        e.EngagementScore__c = 3;
+      }
+      update evals;
+    }
+    Test.stopTest();
     // Then
     EvaluatorRun__c submittedResult = [
       SELECT TotalAssigned__c, SubmittedCount__c
@@ -363,6 +398,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -378,20 +414,22 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // When - Flag 3 flow-created evaluations
     Test.startTest();
-    List<SessionEvaluation__c> evals = [
-      SELECT Id
-      FROM SessionEvaluation__c
-      WHERE Run__c = :run.Id
-      LIMIT 3
-    ];
-    for (SessionEvaluation__c e : evals) {
-      e.Flagged__c = true;
-      e.Status__c = 'Submitted'; // Also submit them
-      e.ClarityScore__c = 3;
-      e.DiversityScore__c = 3;
-      e.EngagementScore__c = 3;
+    System.runAs(evaluator) {
+      List<SessionEvaluation__c> evals = [
+        SELECT Id
+        FROM SessionEvaluation__c
+        WHERE Run__c = :run.Id
+        LIMIT 3
+      ];
+      for (SessionEvaluation__c e : evals) {
+        e.Flagged__c = true;
+        e.Status__c = 'Submitted'; // Also submit them
+        e.ClarityScore__c = 3;
+        e.DiversityScore__c = 3;
+        e.EngagementScore__c = 3;
+      }
+      update evals;
     }
-    update evals;
     Test.stopTest();
 
     // Then
@@ -422,6 +460,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -443,8 +482,10 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // When - Flag it
     Test.startTest();
-    eval1.Flagged__c = true;
-    update eval1;
+    System.runAs(evaluator) {
+      eval1.Flagged__c = true;
+      update eval1;
+    }
     Test.stopTest();
 
     EvaluatorRun__c flaggedResult = [
@@ -455,8 +496,10 @@ private class SessionEvaluationTriggerHandlerTest {
     Assert.areEqual(1, flaggedResult.FlaggedCount__c, 'Should be 1');
 
     // When - Unflag it
-    eval1.Flagged__c = false;
-    update eval1;
+    System.runAs(evaluator) {
+      eval1.Flagged__c = false;
+      update eval1;
+    }
 
     EvaluatorRun__c unflaggedResult = [
       SELECT FlaggedCount__c
@@ -483,6 +526,7 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = evaluator.Id,
+      OwnerId = evaluator.Id,
       Status__c = 'In_Progress'
     );
     insert run;
@@ -494,11 +538,13 @@ private class SessionEvaluationTriggerHandlerTest {
       WHERE Run__c = :run.Id
       LIMIT 1
     ];
-    eval1.Status__c = 'Submitted';
-    eval1.ClarityScore__c = 3;
-    eval1.DiversityScore__c = 3;
-    eval1.EngagementScore__c = 3;
-    update eval1;
+    System.runAs(evaluator) {
+      eval1.Status__c = 'Submitted';
+      eval1.ClarityScore__c = 3;
+      eval1.DiversityScore__c = 3;
+      eval1.EngagementScore__c = 3;
+      update eval1;
+    }
 
     // Verify initial state
     EvaluatorRun__c initialResult = [
@@ -514,7 +560,9 @@ private class SessionEvaluationTriggerHandlerTest {
     );
 
     // Delete it
-    delete eval1;
+    System.runAs(evaluator) {
+      delete eval1;
+    }
 
     EvaluatorRun__c deletedResult = [
       SELECT TotalAssigned__c, SubmittedCount__c
@@ -530,7 +578,9 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // When - Undelete
     Test.startTest();
-    undelete eval1;
+    System.runAs(evaluator) {
+      undelete eval1;
+    }
     Test.stopTest();
 
     // Then
@@ -573,11 +623,13 @@ private class SessionEvaluationTriggerHandlerTest {
     EvaluatorRun__c run1 = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = eval1.Id,
+      OwnerId = eval1.Id,
       Status__c = 'In_Progress'
     );
     EvaluatorRun__c run2 = new EvaluatorRun__c(
       Campaign__c = campaign.Id,
       Evaluator__c = eval2.Id,
+      OwnerId = eval2.Id,
       Status__c = 'In_Progress'
     );
     insert new List<EvaluatorRun__c>{ run1, run2 };
@@ -598,33 +650,36 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // When - Submit 3 from run1, 5 from run2
     Test.startTest();
-    List<SessionEvaluation__c> run1Evals = [
-      SELECT Id
-      FROM SessionEvaluation__c
-      WHERE Run__c = :run1.Id
-      LIMIT 3
-    ];
-    for (SessionEvaluation__c e : run1Evals) {
-      e.Status__c = 'Submitted';
-      e.ClarityScore__c = 3;
-      e.DiversityScore__c = 3;
-      e.EngagementScore__c = 3;
+    System.runAs(eval1) {
+      List<SessionEvaluation__c> run1Evals = [
+        SELECT Id
+        FROM SessionEvaluation__c
+        WHERE Run__c = :run1.Id
+        LIMIT 3
+      ];
+      for (SessionEvaluation__c e : run1Evals) {
+        e.Status__c = 'Submitted';
+        e.ClarityScore__c = 3;
+        e.DiversityScore__c = 3;
+        e.EngagementScore__c = 3;
+      }
+      update run1Evals;
     }
-    update run1Evals;
-
-    List<SessionEvaluation__c> run2Evals = [
-      SELECT Id
-      FROM SessionEvaluation__c
-      WHERE Run__c = :run2.Id
-      LIMIT 5
-    ];
-    for (SessionEvaluation__c e : run2Evals) {
-      e.Status__c = 'Submitted';
-      e.ClarityScore__c = 3;
-      e.DiversityScore__c = 3;
-      e.EngagementScore__c = 3;
+    System.runAs(eval2) {
+      List<SessionEvaluation__c> run2Evals = [
+        SELECT Id
+        FROM SessionEvaluation__c
+        WHERE Run__c = :run2.Id
+        LIMIT 5
+      ];
+      for (SessionEvaluation__c e : run2Evals) {
+        e.Status__c = 'Submitted';
+        e.ClarityScore__c = 3;
+        e.DiversityScore__c = 3;
+        e.EngagementScore__c = 3;
+      }
+      update run2Evals;
     }
-    update run2Evals;
     Test.stopTest();
 
     // Then

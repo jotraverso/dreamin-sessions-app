@@ -4,7 +4,7 @@
  * @author DreamOle Development Team
  * @since 2025
  */
-public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler {
+public without sharing class SessionEvaluationTriggerHandler extends TriggerHandler {
   private List<SessionEvaluation__c> newRecords;
   private List<SessionEvaluation__c> oldRecords;
   private Map<Id, SessionEvaluation__c> newRecordsMap;
@@ -141,10 +141,7 @@ public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler
 
     Map<Id, EvaluatorRun__c> runsToUpdate = calculateRunCounts(runIds);
 
-    if (
-      !runsToUpdate.isEmpty() &&
-      EvaluatorRun__c.SObjectType.getDescribe().isUpdateable()
-    ) {
+    if (!runsToUpdate.isEmpty()) {
       update runsToUpdate.values();
     }
   }
@@ -192,11 +189,6 @@ public with sharing class SessionEvaluationTriggerHandler extends TriggerHandler
    */
   private Map<Id, EvaluatorRun__c> calculateRunCounts(Set<Id> runIds) {
     Map<Id, EvaluatorRun__c> runsToUpdate = initializeRunCounts(runIds);
-
-    // Verify read access before querying
-    if (!SessionEvaluation__c.SObjectType.getDescribe().isAccessible()) {
-      return runsToUpdate;
-    }
 
     aggregateTotalAssigned(runIds, runsToUpdate);
     aggregateSubmittedCount(runIds, runsToUpdate);

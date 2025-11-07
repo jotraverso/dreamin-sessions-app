@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0070D2</headerColor>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <description>Application for session evaluation and selection</description>
+    <formFactors>Small</formFactors>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <label>Session Evaluation Console</label>
+    <navType>Standard</navType>
+    <tabs>Home</tabs>
+    <tabs>Session__c</tabs>
+    <tabs>SessionEvaluation__c</tabs>
+    <tabs>EvaluatorRun__c</tabs>
+    <tabs>Campaign</tabs>
+    <tabs>Contact</tabs>
+    <uiType>Lightning</uiType>
+    <utilityBar>Session_Evaluation_Console_UtilityBar</utilityBar>
+</CustomApplication>

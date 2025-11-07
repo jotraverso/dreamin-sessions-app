@@ -31,24 +31,21 @@
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference
-      >newSessionEvaluation.Session__c</assignToReference>
+            <assignToReference>newSessionEvaluation.Session__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>Loop_Sessions.Id</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference
-      >newSessionEvaluation.Status__c</assignToReference>
+            <assignToReference>newSessionEvaluation.Status__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <stringValue>Not Started</stringValue>
             </value>
         </assignmentItems>
         <assignmentItems>
-            <assignToReference
-      >newSessionEvaluation.Evaluator__c</assignToReference>
+            <assignToReference>newSessionEvaluation.Evaluator__c</assignToReference>
             <operator>Assign</operator>
             <value>
                 <elementReference>$Record.Evaluator__c</elementReference>
@@ -58,11 +55,9 @@
             <targetReference>Add_Evaluation_to_Collection</targetReference>
         </connector>
     </assignments>
-    <description
-  >When an EvaluatorRun is created, automatically create SessionEvaluation records for all sessions in the linked Campaign.</description>
+    <description>When an EvaluatorRun is created, automatically create SessionEvaluation records for all sessions in the linked Campaign.</description>
     <environments>Default</environments>
-    <interviewLabel
-  >EvaluatorRun Add Sessions {!$Flow.CurrentDateTime}</interviewLabel>
+    <interviewLabel>EvaluatorRun Add Sessions {!$Flow.CurrentDateTime}</interviewLabel>
     <label>EvaluatorRun Add Sessions</label>
     <loops>
         <name>Loop_Sessions</name>
@@ -109,8 +104,7 @@
         <label>Get Campaign Sessions</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <assignNullValuesIfNoRecordsFound
-    >false</assignNullValuesIfNoRecordsFound>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Loop_Sessions</targetReference>
         </connector>
@@ -138,7 +132,7 @@
         <recordTriggerType>Create</recordTriggerType>
         <triggerType>RecordAfterSave</triggerType>
     </start>
-    <status>Draft</status>
+    <status>Active</status>
     <variables>
         <name>newSessionEvaluation</name>
         <dataType>SObject</dataType>

@@ -58,13 +58,11 @@
     <customProperties>
         <name>ScreenProgressIndicator</name>
         <value>
-            <stringValue
-      >{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
+            <stringValue>{&quot;location&quot;:&quot;top&quot;,&quot;type&quot;:&quot;simple&quot;}</stringValue>
         </value>
     </customProperties>
     <environments>Default</environments>
-    <interviewLabel
-  >Initialize Evaluator Runs {!$Flow.CurrentDateTime}</interviewLabel>
+    <interviewLabel>Initialize Evaluator Runs {!$Flow.CurrentDateTime}</interviewLabel>
     <label>Initialize Evaluator Runs</label>
     <loops>
         <name>Loop_Create_Runs</name>
@@ -111,8 +109,7 @@
         <label>Get Campaign</label>
         <locationX>0</locationX>
         <locationY>0</locationY>
-        <assignNullValuesIfNoRecordsFound
-    >false</assignNullValuesIfNoRecordsFound>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Select_Evaluators</targetReference>
         </connector>
@@ -173,8 +170,7 @@
                     <elementReference>evaluatorIdCollection</elementReference>
                 </value>
             </inputParameters>
-            <inputsOnNextNavToAssocScrn
-      >UseStoredValues</inputsOnNextNavToAssocScrn>
+            <inputsOnNextNavToAssocScrn>UseStoredValues</inputsOnNextNavToAssocScrn>
             <isRequired>true</isRequired>
             <storeOutputAutomatically>true</storeOutputAutomatically>
             <styleProperties>
