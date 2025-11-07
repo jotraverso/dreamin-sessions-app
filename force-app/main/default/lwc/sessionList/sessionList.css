@@ -1,26 +1,39 @@
+/* Base card styling */
 .evaluation-card {
   border-radius: 4px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .slds-card {
   position: relative;
 }
-
 .slds-border_top {
   border-top: 1px solid #dddbda;
 }
 
-/* Swipe container */
+/* Interaction container */
 .swipe-container {
   touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
+  position: relative;
 }
 
-/* Hide navigation buttons on mobile devices */
-@media only screen and (max-width: 768px) {
-  .nav-buttons-desktop {
-    display: none !important;
+/* Fade-only animation */
+@keyframes fadeInSessionEval {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
+.fade-in {
+  animation: fadeInSessionEval 0.25s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in {
+    animation: none;
+  }
+}
+/* Sliding animation additions */

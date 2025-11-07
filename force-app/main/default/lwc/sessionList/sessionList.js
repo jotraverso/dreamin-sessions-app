@@ -15,6 +15,8 @@ export default class SessionList extends LightningElement {
   @track error;
   @track loading = false;
   @track showNonSubmittedOnly = true; // Default to filtering non-submitted only
+  @track transitionClass = "";
+  @track _layoutVersion = 0; // used to force rerender on resize
 
   // Touch/swipe handling
   touchStartX = 0;
@@ -27,6 +29,18 @@ export default class SessionList extends LightningElement {
 
   connectedCallback() {
     this.loadEvaluations();
+    // Listen for resize to update button labels responsively
+    this._resizeHandler = () => {
+      // Increment dummy counter to force re-render for responsive labels
+      this._layoutVersion++;
+    };
+    window.addEventListener("resize", this._resizeHandler);
+  }
+
+  disconnectedCallback() {
+    if (this._resizeHandler) {
+      window.removeEventListener("resize", this._resizeHandler);
+    }
   }
 
   loadEvaluations() {
@@ -116,14 +130,27 @@ export default class SessionList extends LightningElement {
     return this.currentEvaluation?.Flagged__c ? "destructive" : "neutral";
   }
 
+  // Responsive button labels: compact on narrow widths
+  get isCompactLayout() {
+    return window.innerWidth <= 520; // threshold can be tuned
+  }
+  get previousButtonLabel() {
+    return this.isCompactLayout ? "<" : "Previous";
+  }
+  get nextButtonLabel() {
+    return this.isCompactLayout ? ">" : "Next";
+  }
+
   handlePrevious() {
     if (!this.isFirstEvaluation) {
+      this.applySlide();
       this.currentIndex--;
     }
   }
 
   handleNext() {
     if (!this.isLastEvaluation) {
+      this.applySlide();
       this.currentIndex++;
     }
   }
@@ -291,11 +318,13 @@ export default class SessionList extends LightningElement {
       if (deltaX > 0) {
         // Swipe right - go to previous
         if (!this.isFirstEvaluation) {
+          this.applySlide();
           this.handlePrevious();
         }
       } else {
         // Swipe left - go to next
         if (!this.isLastEvaluation) {
+          this.applySlide();
           this.handleNext();
         }
       }
@@ -306,5 +335,21 @@ export default class SessionList extends LightningElement {
     this.touchEndX = 0;
     this.touchStartY = 0;
     this.touchEndY = 0;
+  }
+
+  applySlide() {
+    // Fade-in only animation; we restart it by clearing and re-applying class
+    this.transitionClass = "";
+    // eslint-disable-next-line no-unused-expressions
+    this.offsetHeight; // reflow
+    this.transitionClass = "fade-in";
+    const container = this.template.querySelector(".swipe-container");
+    if (container) {
+      const handler = () => {
+        this.transitionClass = "";
+        container.removeEventListener("animationend", handler);
+      };
+      container.addEventListener("animationend", handler);
+    }
   }
 }

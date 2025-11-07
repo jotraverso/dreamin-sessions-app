@@ -32,7 +32,7 @@
           <!-- Evaluation Card -->
           <template if:true={currentEvaluation}>
             <div
-              class="slds-card slds-p-around_medium swipe-container"
+              class="slds-card slds-p-around_medium swipe-container {transitionClass}"
               ontouchstart={handleTouchStart}
               ontouchmove={handleTouchMove}
               ontouchend={handleTouchEnd}
@@ -41,12 +41,12 @@
               <div
                 class="slds-grid slds-grid_align-spread slds-m-bottom_medium"
               >
-                <!-- Navigation Buttons (Hidden on Mobile) -->
-                <div class="slds-grid slds-gutters_x-small nav-buttons-desktop">
+                <!-- Navigation Buttons (Responsive labels) -->
+                <div class="slds-grid slds-gutters_x-small nav-buttons">
                   <div class="slds-col">
                     <lightning-button
-                      icon-name="utility:chevronleft"
-                      label="Previous"
+                      label={previousButtonLabel}
+                      title="Previous"
                       disabled={isFirstEvaluation}
                       onclick={handlePrevious}
                     >
@@ -54,9 +54,8 @@
                   </div>
                   <div class="slds-col">
                     <lightning-button
-                      icon-name="utility:chevronright"
-                      icon-position="right"
-                      label="Next"
+                      label={nextButtonLabel}
+                      title="Next"
                       disabled={isLastEvaluation}
                       onclick={handleNext}
                     >
@@ -108,12 +107,6 @@
             <p class="slds-text-heading_small">No evaluations available</p>
           </div>
         </template>
-      </template>
-
-      <template if:true={error}>
-        <div class="slds-m-top_small">
-          <p class="slds-text-color_error">{error}</p>
-        </div>
       </template>
     </div>
   </lightning-card>
