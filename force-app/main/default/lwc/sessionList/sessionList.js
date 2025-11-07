@@ -4,6 +4,7 @@ import updateEvaluationScores from "@salesforce/apex/SessionEvaluationService.up
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { RefreshEvent } from "lightning/refresh";
 import { publish, MessageContext } from "lightning/messageService";
+import { reduceErrors } from "c/errorUtils";
 import EVALUATION_PROGRESS_CHANNEL from "@salesforce/messageChannel/EvaluationProgressChannel__c";
 
 export default class SessionList extends LightningElement {
@@ -39,12 +40,17 @@ export default class SessionList extends LightningElement {
         this.error = undefined;
       })
       .catch((error) => {
-        this.error = error.body?.message || "Error loading evaluations";
+        const messages = reduceErrors(error);
+        const message =
+          messages.length > 0
+            ? messages.join("\n")
+            : "Error loading evaluations";
+        this.error = message;
         this.allEvaluations = [];
         // Show toast on error
         const errorEvent = new ShowToastEvent({
           title: "Error",
-          message: this.error,
+          message,
           variant: "error"
         });
         this.dispatchEvent(errorEvent);
@@ -165,8 +171,19 @@ export default class SessionList extends LightningElement {
         this.publishProgressUpdate();
       })
       .catch((error) => {
-        this.error = error.body?.message || "Error updating flag status";
-        this.showToast("Error", this.error, "error");
+        const messages = reduceErrors(error);
+        const message =
+          messages.length > 0
+            ? messages.join("\n")
+            : "Error updating flag status";
+        if (
+          formComponent &&
+          typeof formComponent.showServerError === "function"
+        ) {
+          formComponent.showServerError(message);
+        }
+        this.error = message;
+        this.showToast("Error", message, "error");
       });
   }
 
@@ -219,8 +236,19 @@ export default class SessionList extends LightningElement {
         }
       })
       .catch((error) => {
-        this.error = error.body?.message || "Error submitting evaluation";
-        this.showToast("Error", this.error, "error");
+        const messages = reduceErrors(error);
+        const message =
+          messages.length > 0
+            ? messages.join("\n")
+            : "Error submitting evaluation";
+        if (
+          formComponent &&
+          typeof formComponent.showServerError === "function"
+        ) {
+          formComponent.showServerError(message);
+        }
+        this.error = message;
+        this.showToast("Error", message, "error");
       });
   }
 
