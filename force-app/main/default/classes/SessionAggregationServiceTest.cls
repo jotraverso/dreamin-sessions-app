@@ -11,58 +11,21 @@ private class SessionAggregationServiceTest {
     Campaign camp = TestDataFactory.createCampaign('Agg Camp', true);
     insert camp;
 
-    Session__c sess = TestDataFactory.createSessionWithSpeaker(
-      camp.Id,
-      'Agg Session',
-      'Speaker A',
-      'speakerA@test.com',
-      true
-    );
+    Session__c sess = TestDataFactory.createSessionWithSpeaker(camp.Id, 'Agg Session', 'Speaker A', 'speakerA@test.com', true);
     insert sess;
 
-    User evaluator = TestDataFactory.createUser(
-      'Eval',
-      'OneUser',
-      'eval.one' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
+    User evaluator = TestDataFactory.createUser('Eval', 'OneUser', 'eval.one' + System.currentTimeMillis() + '@test.com', 'Standard User');
     insert evaluator;
+
+    // Create an EvaluatorRun to satisfy master-detail Run__c requirement
+    EvaluatorRun__c run = TestDataFactory.createEvaluatorRun(camp.Id, evaluator.Id, 10);
+    insert run;
 
     // Create 3 submitted evaluations with known scores
     List<SessionEvaluation__c> evals = new List<SessionEvaluation__c>();
-    evals.add(
-      TestDataFactory.createSessionEvaluationWithScores(
-        sess.Id,
-        evaluator.Id,
-        null,
-        4,
-        3,
-        5,
-        'Submitted'
-      )
-    );
-    evals.add(
-      TestDataFactory.createSessionEvaluationWithScores(
-        sess.Id,
-        evaluator.Id,
-        null,
-        5,
-        4,
-        2,
-        'Submitted'
-      )
-    );
-    evals.add(
-      TestDataFactory.createSessionEvaluationWithScores(
-        sess.Id,
-        evaluator.Id,
-        null,
-        3,
-        5,
-        4,
-        'Submitted'
-      )
-    );
+    evals.add(TestDataFactory.createSessionEvaluationWithScores(sess.Id, evaluator.Id, run.Id, 4, 3, 5, 'Submitted'));
+    evals.add(TestDataFactory.createSessionEvaluationWithScores(sess.Id, evaluator.Id, run.Id, 5, 4, 2, 'Submitted'));
+    evals.add(TestDataFactory.createSessionEvaluationWithScores(sess.Id, evaluator.Id, run.Id, 3, 5, 4, 'Submitted'));
     insert evals;
 
     // When
@@ -91,56 +54,23 @@ private class SessionAggregationServiceTest {
     Integer expectedDiversitySum = 3 + 4 + 5;
     Integer expectedEngagementSum = 5 + 2 + 4;
 
-    System.assertEquals(
-      expectedCount,
-      result.EvaluationsSubmitted__c,
-      'Submitted count'
-    );
-    System.assertEquals(
-      expectedClaritySum,
-      result.ClaritySum__c.intValue(),
-      'Clarity sum'
-    );
-    System.assertEquals(
-      expectedDiversitySum,
-      result.DiversitySum__c.intValue(),
-      'Diversity sum'
-    );
-    System.assertEquals(
-      expectedEngagementSum,
-      result.EngagementSum__c.intValue(),
-      'Engagement sum'
-    );
+    System.assertEquals(expectedCount, result.EvaluationsSubmitted__c, 'Submitted count');
+    System.assertEquals(expectedClaritySum, result.ClaritySum__c.intValue(), 'Clarity sum');
+    System.assertEquals(expectedDiversitySum, result.DiversitySum__c.intValue(), 'Diversity sum');
+    System.assertEquals(expectedEngagementSum, result.EngagementSum__c.intValue(), 'Engagement sum');
 
     // Averages and final score
     Decimal expectedClarityAvg = (Decimal) expectedClaritySum / expectedCount;
-    Decimal expectedDiversityAvg =
-      (Decimal) expectedDiversitySum / expectedCount;
-    Decimal expectedEngagementAvg =
-      (Decimal) expectedEngagementSum / expectedCount;
-    Decimal expectedFinal =
-      expectedClarityAvg +
-      expectedDiversityAvg +
-      expectedEngagementAvg;
+    Decimal expectedDiversityAvg = (Decimal) expectedDiversitySum / expectedCount;
+    Decimal expectedEngagementAvg = (Decimal) expectedEngagementSum / expectedCount;
+    Decimal expectedFinal = expectedClarityAvg + expectedDiversityAvg + expectedEngagementAvg;
 
     // Use a small tolerance for decimal comparisons
     Decimal tol = 0.0001;
-    System.assert(
-      Math.abs(result.ClarityAvg__c - expectedClarityAvg) < tol,
-      'Clarity avg'
-    );
-    System.assert(
-      Math.abs(result.DiversityAvg__c - expectedDiversityAvg) < tol,
-      'Diversity avg'
-    );
-    System.assert(
-      Math.abs(result.EngagementAvg__c - expectedEngagementAvg) < tol,
-      'Engagement avg'
-    );
-    System.assert(
-      Math.abs(result.FinalScore__c - expectedFinal) < tol,
-      'Final score'
-    );
+    System.assert(Math.abs(result.ClarityAvg__c - expectedClarityAvg) < tol, 'Clarity avg');
+    System.assert(Math.abs(result.DiversityAvg__c - expectedDiversityAvg) < tol, 'Diversity avg');
+    System.assert(Math.abs(result.EngagementAvg__c - expectedEngagementAvg) < tol, 'Engagement avg');
+    System.assert(Math.abs(result.FinalScore__c - expectedFinal) < tol, 'Final score');
   }
 
   @IsTest
@@ -159,46 +89,23 @@ private class SessionAggregationServiceTest {
     }
     insert sessions;
 
-    User evaluator = TestDataFactory.createUser(
-      'Async',
-      'AsyncUser',
-      'async.user' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
+    User evaluator = TestDataFactory.createUser('Async', 'AsyncUser', 'async.user' + System.currentTimeMillis() + '@test.com', 'Standard User');
     insert evaluator;
+
+    // Create an EvaluatorRun to attach the evaluations (master-detail)
+    EvaluatorRun__c asyncRun = TestDataFactory.createEvaluatorRun(camp.Id, evaluator.Id, 10);
+    insert asyncRun;
 
     List<SessionEvaluation__c> evals = new List<SessionEvaluation__c>();
     for (Session__c s : sessions) {
-      evals.add(
-        TestDataFactory.createSessionEvaluationWithScores(
-          s.Id,
-          evaluator.Id,
-          null,
-          4,
-          4,
-          4,
-          'Submitted'
-        )
-      );
-      evals.add(
-        TestDataFactory.createSessionEvaluationWithScores(
-          s.Id,
-          evaluator.Id,
-          null,
-          5,
-          5,
-          5,
-          'Submitted'
-        )
-      );
+      evals.add(TestDataFactory.createSessionEvaluationWithScores(s.Id, evaluator.Id, asyncRun.Id, 4, 4, 4, 'Submitted'));
+      evals.add(TestDataFactory.createSessionEvaluationWithScores(s.Id, evaluator.Id, asyncRun.Id, 5, 5, 5, 'Submitted'));
     }
     insert evals;
 
     // When: call future method and run asynchronous queue
     Test.startTest();
-    SessionAggregationService.aggregateSessionsAsync(
-      new Set<Id>{ sessions[0].Id, sessions[1].Id }
-    );
+    SessionAggregationService.aggregateSessionsAsync(new Set<Id>{ sessions[0].Id, sessions[1].Id });
     Test.stopTest();
 
     // Then: both sessions should be aggregated
@@ -209,11 +116,7 @@ private class SessionAggregationServiceTest {
     ];
 
     for (Session__c r : results) {
-      System.assertEquals(
-        2,
-        r.EvaluationsSubmitted__c.intValue(),
-        'Should have 2 submitted evaluations'
-      );
+      System.assertEquals(2, r.EvaluationsSubmitted__c.intValue(), 'Should have 2 submitted evaluations');
       // FinalScore should be sum of three averages: (4+5)/2 * 3 = (4.5+4.5+4.5) = 13.5
       System.assert(r.FinalScore__c > 0, 'Final score should be calculated');
     }
@@ -225,11 +128,7 @@ private class SessionAggregationServiceTest {
     Campaign camp = TestDataFactory.createCampaign('Expect Camp', true);
     insert camp;
 
-    List<Session__c> sessions = TestDataFactory.createSessions(
-      camp.Id,
-      3,
-      true
-    );
+    List<Session__c> sessions = TestDataFactory.createSessions(camp.Id, 3, true);
     for (Integer i = 0; i < sessions.size(); i++) {
       sessions[i].PrimarySpeakerName__c = 'Speaker ' + i;
       sessions[i].PrimarySpeakerEmail__c = 'speaker' + i + '@test.com';
@@ -237,31 +136,13 @@ private class SessionAggregationServiceTest {
     insert sessions;
 
     // Create two evaluator users
-    User ev1 = TestDataFactory.createUser(
-      'Ev',
-      'OneUser',
-      'ev.one' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
-    User ev2 = TestDataFactory.createUser(
-      'Ev',
-      'TwoUser',
-      'ev.two' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
+    User ev1 = TestDataFactory.createUser('Ev', 'OneUser', 'ev.one' + System.currentTimeMillis() + '@test.com', 'Standard User');
+    User ev2 = TestDataFactory.createUser('Ev', 'TwoUser', 'ev.two' + System.currentTimeMillis() + '@test.com', 'Standard User');
     insert new List<User>{ ev1, ev2 };
 
     // Create runs: one active, one inactive
-    EvaluatorRun__c run1 = TestDataFactory.createEvaluatorRun(
-      camp.Id,
-      ev1.Id,
-      sessions.size()
-    );
-    EvaluatorRun__c run2 = TestDataFactory.createEvaluatorRun(
-      camp.Id,
-      ev2.Id,
-      sessions.size()
-    );
+    EvaluatorRun__c run1 = TestDataFactory.createEvaluatorRun(camp.Id, ev1.Id, sessions.size());
+    EvaluatorRun__c run2 = TestDataFactory.createEvaluatorRun(camp.Id, ev2.Id, sessions.size());
     run2.Active__c = false;
     insert new List<EvaluatorRun__c>{ run1, run2 };
 
@@ -277,11 +158,7 @@ private class SessionAggregationServiceTest {
       WHERE Campaign__c = :camp.Id
     ];
     for (Session__c s : updated) {
-      System.assertEquals(
-        1,
-        s.EvaluationsExpected__c.intValue(),
-        'Expected count should match active runs'
-      );
+      System.assertEquals(1, s.EvaluationsExpected__c.intValue(), 'Expected count should match active runs');
     }
   }
 }

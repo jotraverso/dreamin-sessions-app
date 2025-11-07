@@ -4,9 +4,9 @@
     <label>% Complete</label>
     <type>Percent</type>
     <formula>IF(
-  OR(ISBLANK(TargetSessionCount__c), TargetSessionCount__c = 0),
+  OR(ISBLANK(TotalAssigned__c), TotalAssigned__c = 0),
   0,
-  SubmittedCount__c / TargetSessionCount__c
+  SubmittedCount__c / TotalAssigned__c
 )</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
     <precision>18</precision>

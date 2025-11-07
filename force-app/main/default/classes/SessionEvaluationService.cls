@@ -68,7 +68,17 @@ public with sharing class SessionEvaluationService {
   public static SessionDTO getNextSessionForEvaluator(Id campaignId) {
     Id userId = UserInfo.getUserId();
 
-    // Find sessions not yet evaluated by this user
+    // Get all session IDs already evaluated with 'Submitted' status
+    Set<Id> evaluatedSessionIds = new Set<Id>();
+    for (SessionEvaluation__c se : [
+      SELECT Session__c
+      FROM SessionEvaluation__c
+      WHERE Evaluator__c = :userId AND Status__c = 'Submitted'
+    ]) {
+      evaluatedSessionIds.add(se.Session__c);
+    }
+
+    // Find next unevaluated session
     List<Session__c> sessions = [
       SELECT
         Id,
@@ -83,15 +93,7 @@ public with sharing class SessionEvaluationService {
         EngagementAvg__c,
         FinalScore__c
       FROM Session__c
-      WHERE
-        Campaign__c = :campaignId
-        AND Status__c != 'Selected'
-        AND Status__c != 'Not_Selected'
-        AND Id NOT IN (
-          SELECT Session__c
-          FROM SessionEvaluation__c
-          WHERE Evaluator__c = :userId AND Status__c = 'Submitted'
-        )
+      WHERE Campaign__c = :campaignId AND Status__c != 'Selected' AND Status__c != 'Not_Selected' AND Id NOT IN :evaluatedSessionIds
       ORDER BY SubmissionDateTime__c ASC
       LIMIT 1
     ];
@@ -139,10 +141,7 @@ public with sharing class SessionEvaluationService {
    */
   @AuraEnabled
   public static Id saveDraft(String evaluationData) {
-    EvaluationDTO dto = (EvaluationDTO) JSON.deserialize(
-      evaluationData,
-      EvaluationDTO.class
-    );
+    EvaluationDTO dto = (EvaluationDTO) JSON.deserialize(evaluationData, EvaluationDTO.class);
 
     SessionEvaluation__c eval = new SessionEvaluation__c();
 
@@ -150,9 +149,7 @@ public with sharing class SessionEvaluationService {
       eval.Id = dto.id;
     } else {
       eval.Session__c = dto.sessionId;
-      eval.Evaluator__c = dto.evaluatorId != null
-        ? dto.evaluatorId
-        : UserInfo.getUserId();
+      eval.Evaluator__c = dto.evaluatorId != null ? dto.evaluatorId : UserInfo.getUserId();
       eval.Run__c = dto.runId;
     }
 
@@ -176,13 +173,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled
   public static void submitEvaluation(Id evaluationId) {
     SessionEvaluation__c eval = [
-      SELECT
-        Id,
-        ClarityScore__c,
-        DiversityScore__c,
-        EngagementScore__c,
-        Status__c,
-        FinalizedSnapshot__c
+      SELECT Id, ClarityScore__c, DiversityScore__c, EngagementScore__c, Status__c, FinalizedSnapshot__c
       FROM SessionEvaluation__c
       WHERE Id = :evaluationId
       FOR UPDATE
@@ -194,11 +185,7 @@ public with sharing class SessionEvaluationService {
     }
 
     // Validate scores are present
-    if (
-      eval.ClarityScore__c == null ||
-      eval.DiversityScore__c == null ||
-      eval.EngagementScore__c == null
-    ) {
+    if (eval.ClarityScore__c == null || eval.DiversityScore__c == null || eval.EngagementScore__c == null) {
       throw new AuraHandledException('All scores must be provided');
     }
 
@@ -217,9 +204,7 @@ public with sharing class SessionEvaluationService {
    */
   @AuraEnabled
   public static void submitEvaluationWithData(String inputJson) {
-    Map<String, Object> data = (Map<String, Object>) JSON.deserializeUntyped(
-      inputJson
-    );
+    Map<String, Object> data = (Map<String, Object>) JSON.deserializeUntyped(inputJson);
 
     Id sessionId = (Id) data.get('sessionId');
     Integer clarity = (Integer) data.get('clarity');
@@ -248,11 +233,7 @@ public with sharing class SessionEvaluationService {
    */
   @AuraEnabled
   public static void flagSession(Id evaluationId, String reason) {
-    SessionEvaluation__c eval = new SessionEvaluation__c(
-      Id = evaluationId,
-      Flagged__c = true,
-      Comments__c = reason
-    );
+    SessionEvaluation__c eval = new SessionEvaluation__c(Id = evaluationId, Flagged__c = true, Comments__c = reason);
 
     update eval;
   }
@@ -393,13 +374,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled(cacheable=true)
   public static Map<String, Object> getEvaluatorProgressByRun(Id runId) {
     EvaluatorRun__c run = [
-      SELECT
-        Id,
-        TargetSessionCount__c,
-        SubmittedCount__c,
-        FlaggedCount__c,
-        PercentComplete__c,
-        Status__c
+      SELECT Id, TotalAssigned__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
       FROM EvaluatorRun__c
       WHERE Id = :runId
       LIMIT 1
@@ -407,7 +382,7 @@ public with sharing class SessionEvaluationService {
 
     Map<String, Object> result = new Map<String, Object>();
     result.put('runId', run.Id);
-    result.put('targetCount', run.TargetSessionCount__c);
+    result.put('targetCount', run.TotalAssigned__c);
     result.put('submittedCount', run.SubmittedCount__c);
     result.put('flaggedCount', run.FlaggedCount__c);
     result.put('percentComplete', run.PercentComplete__c);
@@ -426,13 +401,7 @@ public with sharing class SessionEvaluationService {
     Id userId = UserInfo.getUserId();
 
     EvaluatorRun__c run = [
-      SELECT
-        Id,
-        TargetSessionCount__c,
-        SubmittedCount__c,
-        FlaggedCount__c,
-        PercentComplete__c,
-        Status__c
+      SELECT Id, TotalAssigned__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
       FROM EvaluatorRun__c
       WHERE Campaign__c = :campaignId AND Evaluator__c = :userId
       LIMIT 1
@@ -440,7 +409,7 @@ public with sharing class SessionEvaluationService {
 
     Map<String, Object> result = new Map<String, Object>();
     result.put('runId', run.Id);
-    result.put('targetCount', run.TargetSessionCount__c);
+    result.put('targetCount', run.TotalAssigned__c);
     result.put('submittedCount', run.SubmittedCount__c);
     result.put('flaggedCount', run.FlaggedCount__c);
     result.put('percentComplete', run.PercentComplete__c);
@@ -473,14 +442,10 @@ public with sharing class SessionEvaluationService {
       throw new AuraHandledException('Clarity score must be between 1 and 20');
     }
     if (eval.DiversityScore__c < 1 || eval.DiversityScore__c > 10) {
-      throw new AuraHandledException(
-        'Diversity score must be between 1 and 10'
-      );
+      throw new AuraHandledException('Diversity score must be between 1 and 10');
     }
     if (eval.EngagementScore__c < 1 || eval.EngagementScore__c > 20) {
-      throw new AuraHandledException(
-        'Engagement score must be between 1 and 20'
-      );
+      throw new AuraHandledException('Engagement score must be between 1 and 20');
     }
   }
 
@@ -510,11 +475,7 @@ public with sharing class SessionEvaluationService {
     ];
 
     // Update the run
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Id = runId,
-      SubmittedCount__c = submittedCount,
-      FlaggedCount__c = flaggedCount
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Id = runId, SubmittedCount__c = submittedCount, FlaggedCount__c = flaggedCount);
 
     update run;
   }

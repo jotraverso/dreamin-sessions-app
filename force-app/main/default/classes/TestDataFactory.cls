@@ -40,11 +40,7 @@ public class TestDataFactory {
    * @param selected Whether session is selected
    * @return Session__c record (not inserted)
    */
-  public static Session__c createSession(
-    Id campaignId,
-    String name,
-    Boolean selected
-  ) {
+  public static Session__c createSession(Id campaignId, String name, Boolean selected) {
     Session__c s = new Session__c(
       Name = name != null ? name : 'Test Session',
       Campaign__c = campaignId,
@@ -106,13 +102,7 @@ public class TestDataFactory {
     String coSpeakerEmail,
     Boolean selected
   ) {
-    Session__c session = createSessionWithSpeaker(
-      campaignId,
-      name,
-      primarySpeakerName,
-      primarySpeakerEmail,
-      selected
-    );
+    Session__c session = createSessionWithSpeaker(campaignId, name, primarySpeakerName, primarySpeakerEmail, selected);
     session.CoSpeakerName__c = coSpeakerName;
     session.CoSpeakerEmail__c = coSpeakerEmail;
     session.CoSpeakerJobTitle__c = 'Co-Speaker';
@@ -127,11 +117,7 @@ public class TestDataFactory {
    * @param selected Whether sessions are selected
    * @return List of Session__c records (not inserted)
    */
-  public static List<Session__c> createSessions(
-    Id campaignId,
-    Integer count,
-    Boolean selected
-  ) {
+  public static List<Session__c> createSessions(Id campaignId, Integer count, Boolean selected) {
     List<Session__c> sessions = new List<Session__c>();
     for (Integer i = 0; i < count; i++) {
       sessions.add(createSession(campaignId, 'Test Session ' + i, selected));
@@ -146,17 +132,8 @@ public class TestDataFactory {
    * @param email Email address
    * @return Contact record (not inserted)
    */
-  public static Contact createContact(
-    String firstName,
-    String lastName,
-    String email
-  ) {
-    return new Contact(
-      FirstName = firstName,
-      LastName = lastName,
-      Email = email,
-      Title = 'Test Title'
-    );
+  public static Contact createContact(String firstName, String lastName, String email) {
+    return new Contact(FirstName = firstName, LastName = lastName, Email = email, Title = 'Test Title');
   }
 
   /**
@@ -167,13 +144,7 @@ public class TestDataFactory {
   public static List<Contact> createContacts(Integer count) {
     List<Contact> contacts = new List<Contact>();
     for (Integer i = 0; i < count; i++) {
-      contacts.add(
-        createContact(
-          'FirstName' + i,
-          'LastName' + i,
-          'test' + i + '@example.com'
-        )
-      );
+      contacts.add(createContact('FirstName' + i, 'LastName' + i, 'test' + i + '@example.com'));
     }
     return contacts;
   }
@@ -184,10 +155,7 @@ public class TestDataFactory {
    * @return Account record (not inserted)
    */
   public static Account createAccount(String name) {
-    return new Account(
-      Name = name != null ? name : 'Test Account',
-      Industry = 'Technology'
-    );
+    return new Account(Name = name != null ? name : 'Test Account', Industry = 'Technology');
   }
 
   /**
@@ -198,12 +166,7 @@ public class TestDataFactory {
    * @param profileName Profile name (defaults to 'Standard User')
    * @return User record (not inserted)
    */
-  public static User createUser(
-    String firstName,
-    String lastName,
-    String email,
-    String profileName
-  ) {
+  public static User createUser(String firstName, String lastName, String email, String profileName) {
     Profile p = [
       SELECT Id
       FROM Profile
@@ -212,16 +175,11 @@ public class TestDataFactory {
     ];
     // Build a safe unique username prefix from email (handle missing @)
     Integer atPos = email != null ? email.indexOf('@') : -1;
-    String namePrefix = atPos > 0
-      ? email.substring(0, atPos)
-      : (email != null ? email : 'user');
+    String namePrefix = atPos > 0 ? email.substring(0, atPos) : (email != null ? email : 'user');
     String uniqueName = namePrefix + System.currentTimeMillis();
 
     // Safe alias: first char of firstName (or 'X') + first up to 4 chars of lastName
-    String aliasFirst = (firstName != null &&
-      firstName.length() > 0)
-      ? firstName.substring(0, 1)
-      : 'X';
+    String aliasFirst = (firstName != null && firstName.length() > 0) ? firstName.substring(0, 1) : 'X';
     Integer lastLen = (lastName != null) ? Math.min(4, lastName.length()) : 0;
     String aliasLast = lastLen > 0 ? lastName.substring(0, lastLen) : 'User';
 
@@ -246,14 +204,11 @@ public class TestDataFactory {
    * @param targetCount Target session count
    * @return EvaluatorRun__c record (not inserted)
    */
-  public static EvaluatorRun__c createEvaluatorRun(
-    Id campaignId,
-    Id evaluatorId,
-    Integer targetCount
-  ) {
+  public static EvaluatorRun__c createEvaluatorRun(Id campaignId, Id evaluatorId, Integer targetCount) {
     return new EvaluatorRun__c(
       Campaign__c = campaignId,
       Evaluator__c = evaluatorId,
+      OwnerId = evaluatorId,
       Status__c = 'In_Progress',
       Active__c = true,
       TargetSessionCount__c = targetCount != null ? targetCount : 10,
@@ -270,11 +225,7 @@ public class TestDataFactory {
    * @param targetCount Target session count for each run
    * @return List of EvaluatorRun__c records (not inserted)
    */
-  public static List<EvaluatorRun__c> createEvaluatorRuns(
-    Id campaignId,
-    List<Id> evaluatorIds,
-    Integer targetCount
-  ) {
+  public static List<EvaluatorRun__c> createEvaluatorRuns(Id campaignId, List<Id> evaluatorIds, Integer targetCount) {
     List<EvaluatorRun__c> runs = new List<EvaluatorRun__c>();
     for (Id evaluatorId : evaluatorIds) {
       runs.add(createEvaluatorRun(campaignId, evaluatorId, targetCount));
@@ -290,12 +241,46 @@ public class TestDataFactory {
    * @param status Status (Draft, Submitted, etc.)
    * @return SessionEvaluation__c record (not inserted)
    */
-  public static SessionEvaluation__c createSessionEvaluation(
-    Id sessionId,
-    Id evaluatorId,
-    Id runId,
-    String status
-  ) {
+  public static SessionEvaluation__c createSessionEvaluation(Id sessionId, Id evaluatorId, Id runId, String status) {
+    // If Run__c is master-detail and callers didn't supply a runId, create a minimal EvaluatorRun
+    if (runId == null) {
+      Id campaignId = null;
+      if (sessionId != null) {
+        // Try to resolve the Campaign from the Session if available
+        try {
+          Session__c s = [
+            SELECT Id, Campaign__c
+            FROM Session__c
+            WHERE Id = :sessionId
+            LIMIT 1
+          ];
+          campaignId = s.Campaign__c;
+        } catch (Exception e) {
+          // If lookup fails in test context just log and continue with null campaignId
+          System.debug('TestDataFactory.createSessionEvaluation: unable to resolve Session campaign: ' + e.getMessage());
+        }
+      }
+
+      // Ensure we have an evaluator user
+      if (evaluatorId == null) {
+        User u = createUser('Temp', 'Evaluator', 'temp_evaluator_' + String.valueOf(System.currentTimeMillis()) + '@test.org', 'Standard User');
+        insert u;
+        evaluatorId = u.Id;
+      }
+
+      EvaluatorRun__c tmpRun = new EvaluatorRun__c(
+        Campaign__c = campaignId,
+        Evaluator__c = evaluatorId,
+        Status__c = 'In_Progress',
+        Active__c = true,
+        StartedAt__c = System.now(),
+        SubmittedCount__c = 0,
+        FlaggedCount__c = 0
+      );
+      insert tmpRun;
+      runId = tmpRun.Id;
+    }
+
     return new SessionEvaluation__c(
       Session__c = sessionId,
       Evaluator__c = evaluatorId,
@@ -315,17 +300,10 @@ public class TestDataFactory {
    * @param status Status
    * @return List of SessionEvaluation__c records (not inserted)
    */
-  public static List<SessionEvaluation__c> createSessionEvaluations(
-    List<Id> sessionIds,
-    Id evaluatorId,
-    Id runId,
-    String status
-  ) {
+  public static List<SessionEvaluation__c> createSessionEvaluations(List<Id> sessionIds, Id evaluatorId, Id runId, String status) {
     List<SessionEvaluation__c> evaluations = new List<SessionEvaluation__c>();
     for (Id sessionId : sessionIds) {
-      evaluations.add(
-        createSessionEvaluation(sessionId, evaluatorId, runId, status)
-      );
+      evaluations.add(createSessionEvaluation(sessionId, evaluatorId, runId, status));
     }
     return evaluations;
   }
@@ -350,12 +328,7 @@ public class TestDataFactory {
     Integer engagement,
     String status
   ) {
-    SessionEvaluation__c eval = createSessionEvaluation(
-      sessionId,
-      evaluatorId,
-      runId,
-      status
-    );
+    SessionEvaluation__c eval = createSessionEvaluation(sessionId, evaluatorId, runId, status);
     eval.ClarityScore__c = clarity;
     eval.DiversityScore__c = diversity;
     eval.EngagementScore__c = engagement;

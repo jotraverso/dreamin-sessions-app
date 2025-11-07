@@ -3,7 +3,6 @@
     <fullName>AllSubmitted__c</fullName>
     <label>All Submitted</label>
     <type>Checkbox</type>
-    <formula
-  >SubmittedCount__c = TargetSessionCount__c &amp;&amp; TargetSessionCount__c &gt; 0</formula>
+    <formula>SubmittedCount__c = TotalAssigned__c &amp;&amp; TotalAssigned__c &gt; 0</formula>
     <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
 </CustomField>

@@ -6,7 +6,6 @@
     <columns>Evaluator__c</columns>
     <columns>Status__c</columns>
     <columns>Active__c</columns>
-    <columns>TargetSessionCount__c</columns>
     <columns>TotalAssigned__c</columns>
     <columns>SubmittedCount__c</columns>
     <columns>PercentComplete__c</columns>
