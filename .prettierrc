@@ -1,5 +1,6 @@
 {
   "trailingComma": "none",
+  "printWidth": 150,
   "plugins": ["prettier-plugin-apex", "@prettier/plugin-xml"],
   "overrides": [
     {
