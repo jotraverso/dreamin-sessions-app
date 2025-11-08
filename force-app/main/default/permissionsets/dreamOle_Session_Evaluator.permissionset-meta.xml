@@ -1,70 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <description
-  >Permission set for session evaluators to access and evaluate sessions anonymously without seeing speaker information</description>
+    <description>Permission set for session evaluators to access and evaluate sessions anonymously without seeing speaker information</description>
     <hasActivationRequired>false</hasActivationRequired>
     <label>dreamOle Session Evaluator</label>
     
-    <!-- Session Object Permissions -->
-    <objectPermissions>
-        <allowCreate>false</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>false</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>Session__c</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    
-    <!-- Session Evaluation Object Permissions -->
-    <objectPermissions>
-        <allowCreate>true</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>SessionEvaluation__c</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    
-    <!-- Evaluator Run Object Permissions -->
-    <objectPermissions>
-        <allowCreate>false</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>false</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>EvaluatorRun__c</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    
-    <!-- Campaign Object Permissions (read-only for context) -->
-    <objectPermissions>
-        <allowCreate>false</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>false</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>Campaign</object>
-        <viewAllRecords>false</viewAllRecords>
-    </objectPermissions>
-    
-    <!-- Session Field Permissions - Non-sensitive, non-required fields only -->
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Session__c.Abstract__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Session__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Session__c.SubmissionDateTime__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
+    <!-- SessionEvaluation__c field level permissions omitted; access is provided through Apex services (SessionEvaluationService) to avoid required-field metadata deployments for master-detail relationships -->
     
     <!-- Hide all speaker-related sensitive fields (excluding them from permission set) -->
     <!-- PrimarySpeakerName__c - required field, cannot be included -->
@@ -115,7 +55,7 @@
         <readable>false</readable>
     </fieldPermissions>
     
-    <!-- Hide aggregation and scoring fields from evaluators -->
+    <!-- Aggregation and scoring fields: evaluators should be able to read aggregated scores (read-only) -->
     <fieldPermissions>
         <editable>false</editable>
         <field>Session__c.ClaritySum__c</field>
@@ -134,22 +74,22 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Session__c.ClarityAvg__c</field>
-        <readable>false</readable>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Session__c.DiversityAvg__c</field>
-        <readable>false</readable>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Session__c.EngagementAvg__c</field>
-        <readable>false</readable>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
         <field>Session__c.FinalScore__c</field>
-        <readable>false</readable>
+        <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
@@ -211,11 +151,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>SessionEvaluation__c.FinalizedSnapshot__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>SessionEvaluation__c.Run__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
