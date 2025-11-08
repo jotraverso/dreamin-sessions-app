@@ -2,12 +2,16 @@
   <lightning-card title="My Evaluation Progress">
     <div class="slds-p-around_medium">
       <template if:true={progress}>
+        <!-- Status Badge -->
+        <div class="slds-m-bottom_medium slds-text-align_center">
+          <lightning-badge label={statusLabel} class={statusVariant}> </lightning-badge>
+        </div>
+
+        <!-- Progress Metrics -->
         <div class="slds-grid slds-gutters">
           <div class="slds-col slds-size_1-of-4">
             <div class="slds-text-align_center">
-              <div class="slds-text-heading_large">
-                {progress.submittedCount}
-              </div>
+              <div class="slds-text-heading_large">{progress.submittedCount}</div>
               <div class="slds-text-body_small">Submitted</div>
             </div>
           </div>
@@ -25,31 +29,45 @@
           </div>
           <div class="slds-col slds-size_1-of-4">
             <div class="slds-text-align_center">
-              <div class="slds-text-heading_large">
-                {percentCompleteDisplay}%
-              </div>
+              <div class="slds-text-heading_large">{percentCompleteDisplay}%</div>
               <div class="slds-text-body_small">Complete</div>
             </div>
           </div>
         </div>
 
+        <!-- Progress Bar -->
         <div class="slds-m-top_medium">
-          <lightning-progress-bar value={progress.percentComplete} size="large">
-          </lightning-progress-bar>
+          <lightning-progress-bar value={progress.percentComplete} size="large"> </lightning-progress-bar>
         </div>
 
-        <template if:true={isComplete}>
+        <!-- Finalize Button -->
+        <template if:true={showFinalizeButton}>
           <div class="slds-m-top_medium slds-text-align_center">
             <lightning-button
               variant="brand"
               label="Finalize My Evaluations"
+              title="Lock all evaluations and mark this run as complete"
               onclick={handleFinalize}
+              disabled={finalizeButtonDisabled}
+              icon-name="utility:lock"
             >
             </lightning-button>
+            <div class="slds-m-top_small slds-text-body_small slds-text-color_weak">
+              Once finalized, no further changes can be made to your evaluations.
+            </div>
+          </div>
+        </template>
+
+        <!-- Finalized Message -->
+        <template if:true={isFinalized}>
+          <div class="slds-m-top_medium slds-text-align_center">
+            <lightning-icon icon-name="utility:success" alternative-text="Finalized" size="small" class="slds-m-right_xx-small"> </lightning-icon>
+            <span class="slds-text-color_success"> This evaluation run has been finalized and locked. </span>
           </div>
         </template>
       </template>
 
+      <!-- Error Display -->
       <template if:true={error}>
         <p class="slds-text-color_error">{error}</p>
       </template>

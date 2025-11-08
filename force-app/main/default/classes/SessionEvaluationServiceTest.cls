@@ -391,6 +391,39 @@ private class SessionEvaluationServiceTest {
   }
 
   @IsTest
+  static void testCanFinalizeRun() {
+    EvaluatorRun__c run = [
+      SELECT Id, Evaluator__c
+      FROM EvaluatorRun__c
+      LIMIT 1
+    ];
+
+    User evalUser = [
+      SELECT Id
+      FROM User
+      WHERE Id = :run.Evaluator__c
+      LIMIT 1
+    ];
+
+    Test.startTest();
+
+    // Before finalization - should return true if all submitted (depends on data)
+    Boolean canFinalizeBefore = SessionEvaluationService.canFinalizeRun(run.Id);
+
+    // Finalize the run
+    System.runAs(evalUser) {
+      SessionEvaluationService.finalizeRun(run.Id);
+    }
+
+    // After finalization - should return false
+    Boolean canFinalizeAfter = SessionEvaluationService.canFinalizeRun(run.Id);
+
+    Test.stopTest();
+
+    System.assertEquals(false, canFinalizeAfter, 'Should not be able to finalize an already finalized run');
+  }
+
+  @IsTest
   static void testFinalizeRun_AlreadyFinalized() {
     EvaluatorRun__c run = [
       SELECT Id, Evaluator__c
@@ -424,6 +457,52 @@ private class SessionEvaluationServiceTest {
     Test.stopTest();
 
     System.assert(exceptionThrown, 'Should throw exception when already finalized');
+  }
+
+  @IsTest
+  static void testPreventChangesOnFinalizedRun() {
+    // Get a run with evaluations
+    EvaluatorRun__c run = [
+      SELECT Id, Evaluator__c
+      FROM EvaluatorRun__c
+      LIMIT 1
+    ];
+
+    SessionEvaluation__c eval = [
+      SELECT Id, ClarityScore__c, Evaluator__c
+      FROM SessionEvaluation__c
+      WHERE Run__c = :run.Id
+      LIMIT 1
+    ];
+
+    User evalUser = [
+      SELECT Id
+      FROM User
+      WHERE Id = :run.Evaluator__c
+      LIMIT 1
+    ];
+
+    // Finalize the run
+    System.runAs(evalUser) {
+      SessionEvaluationService.finalizeRun(run.Id);
+    }
+
+    Test.startTest();
+    Boolean validationRuleFired = false;
+    try {
+      // Try to update an evaluation after finalization
+      System.runAs(evalUser) {
+        eval.ClarityScore__c = 15;
+        update eval;
+      }
+      System.assert(false, 'Should have thrown validation exception');
+    } catch (DmlException e) {
+      validationRuleFired = true;
+      System.assert(e.getMessage().contains('finalized'), 'Exception should mention finalized run. Got: ' + e.getMessage());
+    }
+    Test.stopTest();
+
+    System.assert(validationRuleFired, 'Validation rule should prevent changes on finalized run');
   }
 
   @IsTest

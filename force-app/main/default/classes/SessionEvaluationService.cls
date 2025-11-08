@@ -245,7 +245,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled
   public static void finalizeRun(Id runId) {
     EvaluatorRun__c run = [
-      SELECT Id, Status__c, AllSubmitted__c, FinalizedAt__c
+      SELECT Id, Status__c, AllSubmitted__c, FinalizedAt__c, SubmittedCount__c, TotalAssigned__c
       FROM EvaluatorRun__c
       WHERE Id = :runId
       FOR UPDATE
@@ -254,6 +254,12 @@ public with sharing class SessionEvaluationService {
     if (run.FinalizedAt__c != null) {
       throw new AuraHandledException('Run already finalized');
     }
+
+    // Optional: Check if all evaluations are submitted
+    // Uncomment if you want to enforce this requirement
+    // if (run.SubmittedCount__c < run.TotalAssigned__c) {
+    //   throw new AuraHandledException('Cannot finalize: Not all evaluations have been submitted');
+    // }
 
     // Update all evaluations to finalized
     List<SessionEvaluation__c> evals = [
@@ -274,6 +280,29 @@ public with sharing class SessionEvaluationService {
     run.FinalizationToken__c = generateToken();
 
     update run;
+  }
+
+  /**
+   * @description Check if a run can be finalized
+   * @param runId EvaluatorRun ID
+   * @return Boolean indicating if run can be finalized
+   */
+  @AuraEnabled(cacheable=true)
+  public static Boolean canFinalizeRun(Id runId) {
+    EvaluatorRun__c run = [
+      SELECT Id, FinalizedAt__c, SubmittedCount__c, TotalAssigned__c
+      FROM EvaluatorRun__c
+      WHERE Id = :runId
+      LIMIT 1
+    ];
+
+    // Cannot finalize if already finalized
+    if (run.FinalizedAt__c != null) {
+      return false;
+    }
+
+    // Can finalize if all evaluations are submitted
+    return run.SubmittedCount__c >= run.TotalAssigned__c && run.TotalAssigned__c > 0;
   }
 
   /**

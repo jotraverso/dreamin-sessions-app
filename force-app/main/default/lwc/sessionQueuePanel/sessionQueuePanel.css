@@ -1,0 +1,19 @@
+.slds-badge {
+  font-size: 1rem;
+  padding: 0.5rem 1rem;
+}
+
+.variant-success {
+  background-color: #04844b;
+  color: white;
+}
+
+.variant-warning {
+  background-color: #fe9339;
+  color: white;
+}
+
+.variant-inverse {
+  background-color: #706e6b;
+  color: white;
+}
