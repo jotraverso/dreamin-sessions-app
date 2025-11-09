@@ -2,32 +2,25 @@
   <lightning-card title="Session Evaluations">
     <div class="slds-p-around_medium">
       <!-- Filter Toggle -->
-      <div
-        class="slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center"
-      >
+      <div class="slds-m-bottom_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-center">
         <div>
-          <lightning-input
-            type="toggle"
-            label="Filter Non-Submitted Only"
-            checked={showNonSubmittedOnly}
-            onchange={handleToggleFilter}
-          >
+          <lightning-input type="toggle" label="Show Flagged &amp; Pending" checked={showNonSubmittedOnly} onchange={handleToggleFilter}>
           </lightning-input>
         </div>
-        <div
-          class="slds-text-body_small slds-text-color_weak slds-m-left_small"
-        >
-          {filterDescription}
-        </div>
+        <div class="slds-text-body_small slds-text-color_weak slds-m-left_small">{filterDescription}</div>
       </div>
 
       <template if:true={loading}>
-        <lightning-spinner
-          alternative-text="Loading evaluations..."
-        ></lightning-spinner>
+        <lightning-spinner alternative-text="Loading evaluations..."></lightning-spinner>
       </template>
 
       <template if:false={loading}>
+        <!-- Short spinner overlay shown after submit to smooth transition -->
+        <template if:true={showSpinner}>
+          <div class="spinner-overlay">
+            <lightning-spinner alternative-text="Processing..." size="small"></lightning-spinner>
+          </div>
+        </template>
         <template if:true={hasEvaluations}>
           <!-- Evaluation Card -->
           <template if:true={currentEvaluation}>
@@ -38,66 +31,40 @@
               ontouchend={handleTouchEnd}
             >
               <!-- Action Buttons at Top -->
-              <div
-                class="slds-grid slds-grid_align-spread slds-m-bottom_medium"
-              >
+              <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
                 <!-- Navigation Buttons (Responsive labels) -->
                 <div class="slds-grid slds-gutters_x-small nav-buttons">
                   <div class="slds-col">
-                    <lightning-button
-                      label={previousButtonLabel}
-                      title="Previous"
-                      disabled={isFirstEvaluation}
-                      onclick={handlePrevious}
-                    >
+                    <lightning-button label={previousButtonLabel} title="Previous" disabled={isFirstEvaluation} onclick={handlePrevious}>
                     </lightning-button>
                   </div>
                   <div class="slds-col">
-                    <lightning-button
-                      label={nextButtonLabel}
-                      title="Next"
-                      disabled={isLastEvaluation}
-                      onclick={handleNext}
-                    >
-                    </lightning-button>
+                    <lightning-button label={nextButtonLabel} title="Next" disabled={isLastEvaluation} onclick={handleNext}> </lightning-button>
                   </div>
                 </div>
 
                 <!-- Action Buttons -->
                 <div class="slds-grid slds-gutters_x-small">
                   <div class="slds-col">
-                    <lightning-button
-                      variant={flagButtonVariant}
-                      icon-name="utility:warning"
-                      label={flagButtonLabel}
-                      onclick={handleFlag}
-                    >
+                    <lightning-button variant={flagButtonVariant} icon-name="utility:warning" label={flagButtonLabel} onclick={handleFlag}>
                     </lightning-button>
                   </div>
                   <div class="slds-col">
-                    <lightning-button
-                      variant="brand"
-                      label="Submit Scores"
-                      onclick={handleSubmit}
-                    >
-                    </lightning-button>
+                    <lightning-button variant="brand" label="Submit" onclick={handleSubmit}> </lightning-button>
                   </div>
                 </div>
               </div>
 
               <!-- Progress Indicator -->
-              <div
-                class="slds-text-align_center slds-m-bottom_small slds-text-color_weak"
-              >
+              <div class="slds-text-align_center slds-m-bottom_small slds-text-color_weak">
                 Evaluation {currentIndex} of {totalEvaluations}
+                <template if:true={currentEvaluation.Status__c}>
+                  <span class="status-badge">{currentEvaluation.Status__c}</span>
+                </template>
               </div>
 
               <!-- Evaluation Form Component -->
-              <c-evaluation-form
-                evaluation-id={currentEvaluation.Id}
-                evaluation={currentEvaluation}
-              >
-              </c-evaluation-form>
+              <c-evaluation-form evaluation-id={currentEvaluation.Id} evaluation={currentEvaluation}> </c-evaluation-form>
             </div>
           </template>
         </template>

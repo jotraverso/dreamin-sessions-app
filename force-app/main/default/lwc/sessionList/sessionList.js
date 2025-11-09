@@ -7,6 +7,8 @@ import { publish, MessageContext } from "lightning/messageService";
 import { reduceErrors } from "c/errorUtils";
 import EVALUATION_PROGRESS_CHANNEL from "@salesforce/messageChannel/EvaluationProgressChannel__c";
 
+/* eslint-disable @lwc/lwc/no-async-operation */
+
 export default class SessionList extends LightningElement {
   @api recordId; // EvaluatorRun record ID when on record page
 
@@ -16,6 +18,7 @@ export default class SessionList extends LightningElement {
   @track loading = false;
   @track showNonSubmittedOnly = true; // Default to filtering non-submitted only
   @track transitionClass = "";
+  @track showSpinner = false;
   @track _layoutVersion = 0; // used to force rerender on resize
 
   // Touch/swipe handling
@@ -55,10 +58,7 @@ export default class SessionList extends LightningElement {
       })
       .catch((error) => {
         const messages = reduceErrors(error);
-        const message =
-          messages.length > 0
-            ? messages.join("\n")
-            : "Error loading evaluations";
+        const message = messages.length > 0 ? messages.join("\n") : "Error loading evaluations";
         this.error = message;
         this.allEvaluations = [];
         // Show toast on error
@@ -82,9 +82,7 @@ export default class SessionList extends LightningElement {
     // Filter based on showNonSubmittedOnly toggle
     if (this.showNonSubmittedOnly) {
       // Show only non-submitted evaluations (Status !== 'Submitted')
-      return this.allEvaluations.filter(
-        (evaluation) => evaluation.Status__c !== "Submitted"
-      );
+      return this.allEvaluations.filter((evaluation) => evaluation.Status__c !== "Submitted");
     }
 
     // Show all evaluations
@@ -185,28 +183,54 @@ export default class SessionList extends LightningElement {
       comments: formData.comments,
       flagged: newFlaggedState
     })
-      .then(() => {
-        // Update local state
-        this.currentEvaluation.Flagged__c = newFlaggedState;
-        this.showToast(
-          "Success",
-          `Session ${newFlaggedState ? "flagged" : "unflagged"} successfully`,
-          "success"
-        );
+      .then((updatedEval) => {
+        const returned = Array.isArray(updatedEval) ? updatedEval[0] : updatedEval;
+        if (returned && returned.Id) {
+          // Update currently displayed evaluation
+          if (this.currentEvaluation && this.currentEvaluation.Id === returned.Id) {
+            Object.assign(this.currentEvaluation, returned);
+          }
+
+          // Update master list
+          const masterIdx = this.allEvaluations.findIndex((e) => e.Id === returned.Id);
+          if (masterIdx !== -1) {
+            this.allEvaluations[masterIdx] = Object.assign({}, this.allEvaluations[masterIdx], returned);
+          }
+        }
+
+        this.showToast("Success", `Session ${newFlaggedState ? "flagged" : "unflagged"} successfully`, "success");
 
         // Publish message to update progress
         this.publishProgressUpdate();
+
+        // Show a short spinner to smooth the transition
+        this.showSpinner = true;
+
+        // Keep spinner visible for 500ms, then continue with navigation/refresh
+        window.setTimeout(() => {
+          this.showSpinner = false;
+
+          // If the active filter removed the current item, adjust currentIndex
+          const filteredCount = this.evaluations.length;
+          if (filteredCount === 0) {
+            this.currentIndex = 0;
+          } else if (this.currentIndex > filteredCount) {
+            this.currentIndex = filteredCount;
+          }
+
+          // Refresh the page
+          this.dispatchEvent(new RefreshEvent());
+
+          // Move to next if available
+          if (this.currentIndex > 0 && !this.isLastEvaluation) {
+            this.handleNext();
+          }
+        }, 500);
       })
       .catch((error) => {
         const messages = reduceErrors(error);
-        const message =
-          messages.length > 0
-            ? messages.join("\n")
-            : "Error updating flag status";
-        if (
-          formComponent &&
-          typeof formComponent.showServerError === "function"
-        ) {
+        const message = messages.length > 0 ? messages.join("\n") : "Error updating flag status";
+        if (formComponent && typeof formComponent.showServerError === "function") {
           formComponent.showServerError(message);
         }
         this.error = message;
@@ -237,41 +261,55 @@ export default class SessionList extends LightningElement {
       comments: formData.comments,
       flagged: this.currentEvaluation.Flagged__c || false
     })
-      .then(() => {
-        this.showToast(
-          "Success",
-          "Evaluation scores submitted successfully",
-          "success"
-        );
+      .then((updatedEval) => {
+        // updatedEval may be returned as the record or an array; normalize to object
+        const returned = Array.isArray(updatedEval) ? updatedEval[0] : updatedEval;
+        this.showToast("Success", "Evaluation scores submitted successfully", "success");
 
-        // Update local record
-        this.currentEvaluation.ClarityScore__c = formData.clarity;
-        this.currentEvaluation.DiversityScore__c = formData.diversity;
-        this.currentEvaluation.EngagementScore__c = formData.engagement;
-        this.currentEvaluation.Comments__c = formData.comments;
-        this.currentEvaluation.Status__c = "Submitted";
+        if (returned && returned.Id) {
+          // Update currently displayed evaluation if it matches
+          if (this.currentEvaluation && this.currentEvaluation.Id === returned.Id) {
+            Object.assign(this.currentEvaluation, returned);
+          }
 
-        // Refresh the page
-        this.dispatchEvent(new RefreshEvent());
+          // Update master list
+          const masterIdx = this.allEvaluations.findIndex((e) => e.Id === returned.Id);
+          if (masterIdx !== -1) {
+            this.allEvaluations[masterIdx] = Object.assign({}, this.allEvaluations[masterIdx], returned);
+          }
+        }
 
         // Publish message to update progress
         this.publishProgressUpdate();
 
-        // Move to next if available
-        if (!this.isLastEvaluation) {
-          this.handleNext();
-        }
+        // Show a short spinner to smooth the transition
+        this.showSpinner = true;
+
+        // Keep spinner visible for 500ms, then continue with navigation/refresh
+        window.setTimeout(() => {
+          this.showSpinner = false;
+
+          // If the active filter removed the current item, adjust currentIndex
+          const filteredCount = this.evaluations.length;
+          if (filteredCount === 0) {
+            this.currentIndex = 0;
+          } else if (this.currentIndex > filteredCount) {
+            this.currentIndex = filteredCount;
+          }
+
+          // Refresh the page
+          this.dispatchEvent(new RefreshEvent());
+
+          // Move to next if available
+          if (this.currentIndex > 0 && !this.isLastEvaluation) {
+            this.handleNext();
+          }
+        }, 500);
       })
       .catch((error) => {
         const messages = reduceErrors(error);
-        const message =
-          messages.length > 0
-            ? messages.join("\n")
-            : "Error submitting evaluation";
-        if (
-          formComponent &&
-          typeof formComponent.showServerError === "function"
-        ) {
+        const message = messages.length > 0 ? messages.join("\n") : "Error submitting evaluation";
+        if (formComponent && typeof formComponent.showServerError === "function") {
           formComponent.showServerError(message);
         }
         this.error = message;

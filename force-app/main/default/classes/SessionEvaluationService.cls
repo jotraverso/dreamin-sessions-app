@@ -179,11 +179,6 @@ public with sharing class SessionEvaluationService {
       FOR UPDATE
     ];
 
-    // Validate not finalized
-    if (eval.FinalizedSnapshot__c) {
-      throw new AuraHandledException('Cannot modify finalized evaluation');
-    }
-
     // Validate scores are present
     if (eval.ClarityScore__c == null || eval.DiversityScore__c == null || eval.EngagementScore__c == null) {
       throw new AuraHandledException('All scores must be provided');
@@ -352,7 +347,7 @@ public with sharing class SessionEvaluationService {
    * @param flagged Flag status
    */
   @AuraEnabled(cacheable=false)
-  public static void updateEvaluationScores(
+  public static SessionEvaluation__c updateEvaluationScores(
     Id evaluationId,
     Integer clarity,
     Integer diversity,
@@ -367,9 +362,7 @@ public with sharing class SessionEvaluationService {
       FOR UPDATE
     ];
 
-    if (eval.FinalizedSnapshot__c) {
-      throw new AuraHandledException('Cannot modify finalized evaluation');
-    }
+    // Finalized evaluations are prevented by org-level Validation Rules; allow Apex to surface validation errors
 
     eval.ClarityScore__c = clarity;
     eval.DiversityScore__c = diversity;
@@ -393,6 +386,25 @@ public with sharing class SessionEvaluationService {
     if (eval.Run__c != null) {
       updateRunCounts(eval.Run__c);
     }
+
+    // Return the updated record (re-query to include formula/rollup fields)
+    return [
+      SELECT
+        Id,
+        Session__c,
+        ClarityScore__c,
+        DiversityScore__c,
+        EngagementScore__c,
+        TotalScore__c,
+        Comments__c,
+        Flagged__c,
+        Status__c,
+        SubmittedDate__c,
+        Run__c
+      FROM SessionEvaluation__c
+      WHERE Id = :evaluationId
+      LIMIT 1
+    ];
   }
 
   /**
