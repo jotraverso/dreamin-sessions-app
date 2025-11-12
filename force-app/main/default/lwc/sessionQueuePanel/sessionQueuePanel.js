@@ -73,10 +73,7 @@ export default class SessionQueuePanel extends LightningElement {
   handleProgressMessage(message) {
     // Refresh data when message received
     if (message.evaluationUpdated && message.runId === this.recordId) {
-      // Refresh the progress data
-      refreshApex(this.wiredProgressResult).then(() => {
-        this.refresh();
-      });
+      this.refresh();
     }
   }
 
