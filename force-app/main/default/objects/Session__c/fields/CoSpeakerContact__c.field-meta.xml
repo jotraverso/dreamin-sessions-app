@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>CoSpeakerContact__c</fullName>
-    <label>Co-Speaker Contact</label>
-    <type>Lookup</type>
-    <required>false</required>
-    <referenceTo>Contact</referenceTo>
-    <relationshipName>CoSpeakerSessions</relationshipName>
-    <relationshipLabel>Sessions (Co-Speaker)</relationshipLabel>
     <deleteConstraint>SetNull</deleteConstraint>
+    <label>Co-Speaker Contact</label>
+    <referenceTo>Contact</referenceTo>
+    <relationshipLabel>Sessions (Co-Speaker)</relationshipLabel>
+    <relationshipName>CoSpeakerSessions</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
 </CustomField>

@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>SubmissionDateTime__c</fullName>
     <label>Submission Date Time</label>
-    <type>DateTime</type>
     <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
 </CustomField>

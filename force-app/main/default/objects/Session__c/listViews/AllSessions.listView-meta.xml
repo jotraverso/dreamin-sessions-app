@@ -4,6 +4,7 @@
     <columns>NAME</columns>
     <columns>Title__c</columns>
     <columns>Category__c</columns>
+    <columns>Language__c</columns>
     <columns>Level__c</columns>
     <columns>DurationMinutes__c</columns>
     <columns>Status__c</columns>
