@@ -59,9 +59,9 @@ export default class SessionItem extends LightningElement {
   get selectionButtonLabel() {
     switch (this.selectionState) {
       case "selected":
-        return "Deselect";
+        return "Reserve";
       case "reserve":
-        return "Deselect Reserve";
+        return "Deselect";
       default:
         return "Select";
     }
@@ -70,11 +70,17 @@ export default class SessionItem extends LightningElement {
   get selectionButtonVariant() {
     switch (this.selectionState) {
       case "selected":
-        return "success";
+        // Button will move to Reserve (orange)
+        return "destructive-text";
       case "reserve":
-        return "brand";
+        // Button will deselect (red)
+        return "destructive";
       default:
-        return "neutral";
+        // Check if selecting would auto-toggle to reserve
+        if (this.selectedCount >= this.maxSelected && this.reserveCount < this.maxReserve) {
+          return "warning"; // Orange for reserve
+        }
+        return "success"; // Green for select
     }
   }
 
