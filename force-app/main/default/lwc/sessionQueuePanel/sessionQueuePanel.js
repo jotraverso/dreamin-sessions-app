@@ -73,7 +73,10 @@ export default class SessionQueuePanel extends LightningElement {
   handleProgressMessage(message) {
     // Refresh data when message received
     if (message.evaluationUpdated && message.runId === this.recordId) {
-      this.refresh();
+      // Refresh the progress data
+      refreshApex(this.wiredProgressResult).then(() => {
+        this.refresh();
+      });
     }
   }
 
@@ -92,8 +95,8 @@ export default class SessionQueuePanel extends LightningElement {
   }
 
   get finalizeButtonDisabled() {
-    // Disable if processing or can't finalize (once we know)
-    return this.isProcessing || this.canFinalize === false;
+    // Disable if there is any pending submissions
+    return !this.canFinalize || this.isProcessing;
   }
 
   get statusLabel() {
