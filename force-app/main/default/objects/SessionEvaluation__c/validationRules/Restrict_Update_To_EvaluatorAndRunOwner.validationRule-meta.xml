@@ -2,19 +2,18 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Restrict_Update_To_EvaluatorAndRunOwner</fullName>
     <active>true</active>
-    <description>Prevent updates to SessionEvaluation__c unless the running user is the Evaluator (Evaluator__c) and also the Owner of the parent Run (Run__r.OwnerId)</description>
+    <description>Prevent updates to SessionEvaluation__c unless the running user is the Evaluator (Evaluator__c)</description>
     <errorConditionFormula>
         AND(
             NOT(ISNEW()),
             NOT(
                 AND(
                     $User.Id = Evaluator__c,
-                    $User.Id = Run__r.Evaluator__c,
-                    $User.Id = Run__r.OwnerId
+                    $User.Id = Run__r.Evaluator__c
                 )
             )
         )
     </errorConditionFormula>
-    <errorMessage>Only the assigned Evaluator who also owns the Evaluation Run can update this record.</errorMessage>
+    <errorMessage>Only the assigned Evaluator can update this record.</errorMessage>
     <errorDisplayField>Evaluator__c</errorDisplayField>
 </ValidationRule>

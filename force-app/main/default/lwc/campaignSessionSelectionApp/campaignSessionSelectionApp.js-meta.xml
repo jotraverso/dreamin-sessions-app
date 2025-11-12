@@ -3,12 +3,14 @@
     <apiVersion>65.0</apiVersion>
     <isExposed>true</isExposed>
     <targets>
+        <target>lightning__RecordPage</target>
         <target>lightning__AppPage</target>
-        <target>lightning__Tab</target>
     </targets>
     <targetConfigs>
-        <targetConfig targets="lightning__AppPage">
-            <property name="campaignId" type="String" label="Campaign ID" />
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Campaign</object>
+            </objects>
         </targetConfig>
     </targetConfigs>
 </LightningComponentBundle>

@@ -45,12 +45,7 @@ private class SessionEvaluationTriggerHandlerTest {
     User evaluator = (User) data.get('evaluator');
 
     // Create run - flow will auto-create 10 Draft evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // Verify flow created 10 evaluations
@@ -110,17 +105,12 @@ private class SessionEvaluationTriggerHandlerTest {
   static void testSubmitThenDeleteEvaluation() {
     // Given
     Map<String, Object> data = createBaseTestData();
+    Campaign campaign = (Campaign) data.get('campaign');
     List<Session__c> sessions = (List<Session__c>) data.get('sessions');
     User evaluator = (User) data.get('evaluator');
-    Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // Get one of the flow-created evaluations and submit it
@@ -170,12 +160,7 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // Get two flow-created evaluations
@@ -231,12 +216,7 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // When - Submit all flow-created evaluations
@@ -282,22 +262,16 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations in 'Not Started' status
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
-    // Check the evaluator run belongs to the evaluator user and is the same user as the Evaluator__c
+    // Check the evaluator run belongs to the evaluator user
     // Query the record to confirm
     EvaluatorRun__c insertedRun = [
-      SELECT Id, Evaluator__c, OwnerId
+      SELECT Id, Evaluator__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
     Assert.areEqual(evaluator.Id, insertedRun.Evaluator__c, 'Evaluator__c should match evaluator user');
-    Assert.areEqual(evaluator.Id, insertedRun.OwnerId, 'OwnerId should match evaluator user');
 
     Test.startTest();
     System.runAs(evaluator) {
@@ -350,12 +324,7 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // Verify initial state
@@ -412,13 +381,10 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
+
+    // Get two flow-created evaluations
 
     // Get one flow-created evaluation
     SessionEvaluation__c eval1 = [
@@ -478,12 +444,7 @@ private class SessionEvaluationTriggerHandlerTest {
     Campaign campaign = (Campaign) data.get('campaign');
 
     // Create run - flow creates 10 evaluations
-    EvaluatorRun__c run = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = evaluator.Id,
-      OwnerId = evaluator.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = evaluator.Id, Status__c = 'In_Progress');
     insert run;
 
     // Get one flow-created evaluation and submit it
@@ -557,8 +518,8 @@ private class SessionEvaluationTriggerHandlerTest {
     insert new List<User>{ eval1, eval2 };
 
     // Create two runs - flow creates 10 evaluations for each
-    EvaluatorRun__c run1 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval1.Id, OwnerId = eval1.Id, Status__c = 'In_Progress');
-    EvaluatorRun__c run2 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval2.Id, OwnerId = eval2.Id, Status__c = 'In_Progress');
+    EvaluatorRun__c run1 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval1.Id, Status__c = 'In_Progress');
+    EvaluatorRun__c run2 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval2.Id, Status__c = 'In_Progress');
     insert new List<EvaluatorRun__c>{ run1, run2 };
 
     // Verify flow created 10 evaluations for each run

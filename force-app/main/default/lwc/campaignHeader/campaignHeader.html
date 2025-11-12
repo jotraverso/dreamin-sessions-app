@@ -1,0 +1,67 @@
+<template>
+  <div class="slds-page-header">
+    <div class="slds-page-header__row">
+      <div class="slds-page-header__col-title">
+        <div class="slds-media">
+          <div class="slds-media__figure">
+            <lightning-icon icon-name="standard:campaign" size="medium"></lightning-icon>
+          </div>
+          <div class="slds-media__body">
+            <div class="slds-page-header__name">
+              <div class="slds-page-header__name-title">
+                <h1>
+                  <span class="slds-page-header__title slds-truncate">Session Selection</span>
+                </h1>
+              </div>
+            </div>
+            <template if:false={hasRecordId}>
+              <div class="slds-m-top_small" style="width: 300px">
+                <lightning-record-picker
+                  label="Select Campaign"
+                  placeholder="Search Campaigns..."
+                  object-api-name="Campaign"
+                  onchange={handleCampaignChange}
+                ></lightning-record-picker>
+              </div>
+            </template>
+            <template if:true={hasCampaign}>
+              <p class="slds-page-header__name-meta">{campaign.name}</p>
+            </template>
+          </div>
+        </div>
+      </div>
+    </div>
+    <template if:true={hasCampaign}>
+      <div class="slds-page-header__row slds-page-header__row_gutters">
+        <div class="slds-page-header__col-details">
+          <ul class="slds-page-header__detail-row">
+            <li class="slds-page-header__detail-block">
+              <div class="slds-text-title slds-truncate">Max Selected</div>
+              <div class="slds-truncate">
+                <lightning-badge label={maxSelectedLabel}></lightning-badge>
+              </div>
+            </li>
+            <li class="slds-page-header__detail-block">
+              <div class="slds-text-title slds-truncate">Selected Sessions</div>
+              <div class="slds-truncate">
+                <lightning-badge label={selectedLabel} class={selectedBadgeClass}></lightning-badge>
+              </div>
+            </li>
+            <li class="slds-page-header__detail-block">
+              <div class="slds-text-title slds-truncate">Max Reserve</div>
+              <div class="slds-truncate">
+                <lightning-badge label={maxReserveLabel}></lightning-badge>
+              </div>
+            </li>
+            <li class="slds-page-header__detail-block">
+              <div class="slds-text-title slds-truncate">Reserve Sessions</div>
+              <div class="slds-truncate">
+                <lightning-badge label={reserveLabel} class={reserveBadgeClass}></lightning-badge>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </template>
+  </div>
+</template>

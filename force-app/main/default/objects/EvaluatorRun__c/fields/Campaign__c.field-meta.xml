@@ -2,9 +2,11 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Campaign__c</fullName>
     <label>Event</label>
-    <type>Lookup</type>
-    <required>true</required>
     <referenceTo>Campaign</referenceTo>
     <relationshipName>EvaluatorRuns</relationshipName>
-    <deleteConstraint>Restrict</deleteConstraint>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
 </CustomField>

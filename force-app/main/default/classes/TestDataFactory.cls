@@ -199,7 +199,7 @@ public class TestDataFactory {
 
   /**
    * @description Create a test EvaluatorRun
-   * @param campaignId Campaign ID
+   * @param campaignId Campaign ID (required for Master-Detail relationship)
    * @param evaluatorId User ID of evaluator
    * @param targetCount Target session count
    * @return EvaluatorRun__c record (not inserted)
@@ -208,7 +208,6 @@ public class TestDataFactory {
     return new EvaluatorRun__c(
       Campaign__c = campaignId,
       Evaluator__c = evaluatorId,
-      OwnerId = evaluatorId,
       Status__c = 'In_Progress',
       Active__c = true,
       TargetSessionCount__c = targetCount != null ? targetCount : 10,

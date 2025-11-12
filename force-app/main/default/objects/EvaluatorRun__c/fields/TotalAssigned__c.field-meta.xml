@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>TotalAssigned__c</fullName>
-    <label>Total Assigned (deprecated)</label>
-    <description>Deprecated: replaced by rollup summary field TotalEvaluations__c. Kept for backward-compatibility in metadata only.</description>
-    <inlineHelpText>Deprecated. Use TotalEvaluations__c (rollup summary) instead.</inlineHelpText>
-    <type>Number</type>
-    <precision>4</precision>
-    <scale>0</scale>
-    <required>false</required>
     <defaultValue>0</defaultValue>
+    <description>Deprecated: replaced by rollup summary field TotalEvaluations__c. Kept for backward-compatibility in metadata only.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Deprecated. Use TotalEvaluations__c (rollup summary) instead.</inlineHelpText>
+    <label>Total Assigned (deprecated)</label>
+    <precision>4</precision>
+    <required>false</required>
+    <scale>0</scale>
+    <trackTrending>false</trackTrending>
+    <type>Number</type>
+    <unique>false</unique>
 </CustomField>

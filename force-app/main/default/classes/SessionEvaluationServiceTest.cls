@@ -33,7 +33,6 @@ private class SessionEvaluationServiceTest {
     List<EvaluatorRun__c> runs = new List<EvaluatorRun__c>();
     for (User u : evaluators) {
       EvaluatorRun__c run = TestDataFactory.createEvaluatorRun(camp.Id, u.Id, 5);
-      run.OwnerId = u.Id;
       runs.add(run);
     }
     insert runs;

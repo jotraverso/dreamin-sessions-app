@@ -1,0 +1,53 @@
+<template>
+  <lightning-card title="Sessions" icon-name="custom:custom63">
+    <!-- Filter Section -->
+    <div slot="actions" class="slds-grid slds-gutters slds-wrap">
+      <div class="slds-col slds-size_1-of-2">
+        <lightning-combobox
+          name="categoryFilter"
+          label="Filter by Category"
+          value={categoryFilter}
+          placeholder="All Categories"
+          options={categoryFilterOptions}
+          onchange={handleCategoryFilterChange}
+        ></lightning-combobox>
+      </div>
+      <div class="slds-col slds-size_1-of-2">
+        <lightning-combobox
+          name="languageFilter"
+          label="Filter by Language"
+          value={languageFilter}
+          placeholder="All Languages"
+          options={languageFilterOptions}
+          onchange={handleLanguageFilterChange}
+        ></lightning-combobox>
+      </div>
+    </div>
+
+    <!-- Session List -->
+    <div class="slds-p-around_small">
+      <template if:true={hasSessions}>
+        <template for:each={displayedSessions} for:item="session" for:index="index">
+          <div key={session.id} class="slds-m-bottom_small session-row" data-index={index}>
+            <c-session-item
+              session={session}
+              categories={categories}
+              selected-count={selectedCount}
+              reserve-count={reserveCount}
+              max-selected={maxSelected}
+              max-reserve={maxReserve}
+              onselectionchange={handleSelectionChange}
+              onviewdetails={handleViewDetails}
+              onconvertspeakers={handleConvertSpeakers}
+            ></c-session-item>
+          </div>
+        </template>
+      </template>
+      <template if:false={hasSessions}>
+        <div class="slds-text-align_center slds-p-around_large">
+          <p class="slds-text-body_regular slds-text-color_weak">No sessions found</p>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

@@ -44,13 +44,6 @@
                 <stringValue>In Progress</stringValue>
             </value>
         </assignmentItems>
-        <assignmentItems>
-            <assignToReference>newEvaluatorRun.OwnerId</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Loop_Create_Runs</elementReference>
-            </value>
-        </assignmentItems>
         <connector>
             <targetReference>Add_Run_to_Collection</targetReference>
         </connector>

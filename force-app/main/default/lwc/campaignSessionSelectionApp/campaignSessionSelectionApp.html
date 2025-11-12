@@ -1,0 +1,62 @@
+<template>
+  <lightning-card>
+    <div class="slds-grid slds-wrap">
+      <!-- Header Section -->
+      <div class="slds-col slds-size_1-of-1">
+        <c-campaign-header
+          campaign={campaign}
+          selected-count={selectedCount}
+          reserve-count={reserveCount}
+          has-record-id={hasRecordId}
+          oncampaignchange={handleCampaignChange}
+        ></c-campaign-header>
+      </div>
+
+      <template if:true={effectiveCampaignId}>
+        <!-- Main Content Area -->
+        <div class={mainContentColumnClass}>
+          <c-session-selection-list
+            sessions={filteredSessions}
+            categories={categoryOptions}
+            selected-count={selectedCount}
+            reserve-count={reserveCount}
+            max-selected={campaign.maxSelectedSessions}
+            max-reserve={campaign.maxReserveSessions}
+            onselectionchange={handleSelectionChange}
+            onviewdetails={handleViewDetails}
+            onconvertspeakers={handleConvertSpeakers}
+            onshowtoast={handleShowToast}
+          ></c-session-selection-list>
+        </div>
+
+        <!-- Summary Section - Only show in standalone app mode -->
+        <template if:false={hasRecordId}>
+          <div class="slds-col slds-size_1-of-3 slds-p-horizontal_small">
+            <c-selection-summary
+              selected-count={selectedCount}
+              reserve-count={reserveCount}
+              max-selected={campaign.maxSelectedSessions}
+              max-reserve={campaign.maxReserveSessions}
+              category-stats={categoryStats}
+              language-stats={languageStats}
+            ></c-selection-summary>
+          </div>
+        </template>
+      </template>
+    </div>
+
+    <!-- Session Details Modal -->
+    <template if:true={showDetailsModal}>
+      <c-session-details-modal session={selectedSession} onclose={handleCloseDetailsModal}></c-session-details-modal>
+    </template>
+
+    <!-- Convert Speakers Modal -->
+    <template if:true={showConvertModal}>
+      <c-convert-speakers-modal
+        session-id={selectedSessionId}
+        onclose={handleCloseConvertModal}
+        onconvert={handleSpeakersConverted}
+      ></c-convert-speakers-modal>
+    </template>
+  </lightning-card>
+</template>

@@ -15,8 +15,6 @@ private class EvaluatorRunFlowTest {
 
     // Act: create EvaluatorRun (the flow EvaluatorRun Add Sessions is a record-triggered flow on EvaluatorRun__c create)
     EvaluatorRun__c run = TestDataFactory.createEvaluatorRun(c.Id, evalUser.Id, 10);
-    // Ensure OwnerId and Evaluator set to same user to validate owner/evaluator propagation
-    run.OwnerId = evalUser.Id;
     insert run;
 
     // Because flows run after commit, query for created SessionEvaluation records

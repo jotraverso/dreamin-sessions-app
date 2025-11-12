@@ -1,0 +1,17 @@
+.abstract-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.5em;
+  line-height: 1.5em;
+}
+
+.slds-card {
+  transition: box-shadow 0.2s ease;
+}
+
+.slds-card:hover {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}

@@ -1,0 +1,7 @@
+.session-row:nth-child(odd) {
+  background-color: #f3d9b6;
+}
+
+.session-row:nth-child(even) {
+  background-color: #ffffff;
+}

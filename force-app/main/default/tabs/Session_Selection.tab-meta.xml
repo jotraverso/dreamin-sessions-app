@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Session Selection App for reviewing and selecting campaign sessions</description>
+    <flexiPage>Session_Selection_App</flexiPage>
+    <label>Session Selection</label>
+    <motif>Custom48: Checkbox</motif>
+</CustomTab>

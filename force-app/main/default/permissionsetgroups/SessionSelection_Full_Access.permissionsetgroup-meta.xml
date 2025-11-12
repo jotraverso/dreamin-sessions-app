@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<PermissionSetGroup xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Full access to Campaign Session Selection App - combines all required permissions</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <label>Session Selection - Full Access</label>
+    <permissionSets>SessionSelection_Campaign_Read</permissionSets>
+    <permissionSets>SessionSelection_Session_Write</permissionSets>
+    <permissionSets>SessionSelection_Apex_Execute</permissionSets>
+    <permissionSets>SessionSelection_Contact_Write</permissionSets>
+</PermissionSetGroup>

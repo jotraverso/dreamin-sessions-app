@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+            <objects>
+                <object>Campaign</object>
+            </objects>
+            <property name="selectedCount" type="Integer" default="0" label="Selected Count" />
+            <property name="reserveCount" type="Integer" default="0" label="Reserve Count" />
+            <property name="maxSelected" type="Integer" default="0" label="Max Selected" />
+            <property name="maxReserve" type="Integer" default="0" label="Max Reserve" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

@@ -1,0 +1,118 @@
+<template>
+  <article class="slds-card">
+    <div class="slds-card__header slds-grid">
+      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+        <div class="slds-media__body">
+          <h2 class="slds-card__header-title">
+            <span class="slds-text-heading_small">{session.title}</span>
+          </h2>
+          <div class="slds-grid slds-gutters_xx-small slds-m-top_xx-small">
+            <div class="slds-col">
+              <lightning-badge label={selectionStatusLabel} class={selectionStatusClass}></lightning-badge>
+            </div>
+            <div class="slds-col">
+              <lightning-badge label={session.language}></lightning-badge>
+            </div>
+            <div class="slds-col">
+              <lightning-badge label={session.level}></lightning-badge>
+            </div>
+            <div class="slds-col">
+              <lightning-badge label={durationLabel}></lightning-badge>
+            </div>
+          </div>
+        </div>
+      </header>
+      <div class="slds-no-flex">
+        <div class="slds-grid slds-gutters_xx-small">
+          <div class="slds-col">
+            <lightning-button variant={selectionButtonVariant} label={selectionButtonLabel} onclick={handleToggleSelection}></lightning-button>
+          </div>
+          <div class="slds-col">
+            <lightning-button-icon
+              icon-name="utility:preview"
+              alternative-text="View Details"
+              title="View Details"
+              onclick={handleViewDetails}
+            ></lightning-button-icon>
+          </div>
+          <div class="slds-col">
+            <lightning-button-icon
+              icon-name="utility:people"
+              alternative-text="Convert to Contacts"
+              title="Convert to Contacts"
+              onclick={handleConvertSpeakers}
+            ></lightning-button-icon>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="slds-card__body slds-card__body_inner">
+      <!-- Score Section -->
+      <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_small">
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+          <div class="slds-text-title slds-truncate">Final Score</div>
+          <div class="slds-text-heading_medium">{finalScoreDisplay}</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+          <div class="slds-text-title slds-truncate">Clarity</div>
+          <div class="slds-text-heading_small">{clarityDisplay}</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+          <div class="slds-text-title slds-truncate">Content</div>
+          <div class="slds-text-heading_small">{contentDisplay}</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2 slds-medium-size_1-of-4">
+          <div class="slds-text-title slds-truncate">Engagement</div>
+          <div class="slds-text-heading_small">{engagementDisplay}</div>
+        </div>
+      </div>
+
+      <!-- Abstract -->
+      <div class="slds-m-bottom_small">
+        <div class="slds-text-title slds-m-bottom_xx-small">Abstract</div>
+        <div class="slds-text-body_regular abstract-text">{session.abstractText}</div>
+      </div>
+
+      <!-- Categories and Main Category Selection -->
+      <div class="slds-grid slds-gutters_small">
+        <div class="slds-col slds-size_1-of-2">
+          <div class="slds-text-title slds-m-bottom_xx-small">Categories</div>
+          <div class="slds-text-body_regular">{categoriesDisplay}</div>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+          <lightning-combobox
+            name="mainCategory"
+            label="Main Category"
+            value={currentMainCategory}
+            placeholder="Select Main Category"
+            options={categoryOptions}
+            onchange={handleMainCategoryChange}
+          ></lightning-combobox>
+        </div>
+      </div>
+
+      <!-- Speakers -->
+      <div class="slds-m-top_small">
+        <div class="slds-text-title slds-m-bottom_xx-small">Speakers</div>
+        <div class="slds-grid slds-wrap slds-gutters_small">
+          <template if:true={session.primarySpeakerName}>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+              <div class="slds-text-body_regular">
+                <strong>Primary:</strong> {session.primarySpeakerName}
+                <template if:true={session.primarySpeakerEmail}> <br />({session.primarySpeakerEmail}) </template>
+              </div>
+            </div>
+          </template>
+          <template if:true={session.coSpeakerName}>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+              <div class="slds-text-body_regular">
+                <strong>Co-Speaker:</strong> {session.coSpeakerName}
+                <template if:true={session.coSpeakerEmail}> <br />({session.coSpeakerEmail}) </template>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+  </article>
+</template>

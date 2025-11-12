@@ -1,0 +1,55 @@
+<template>
+  <lightning-card title="Selection Summary" icon-name="standard:date_time">
+    <div class="slds-p-around_small">
+      <!-- Summary Stats -->
+      <div class="slds-grid slds-wrap slds-gutters_small slds-m-bottom_medium">
+        <div class="slds-col slds-size_1-of-2">
+          <div class="stat-card slds-box slds-theme_shade slds-p-around_small slds-text-align_center">
+            <div class="slds-text-title slds-truncate">Selected Sessions</div>
+            <div class="slds-text-heading_large slds-m-top_xx-small">
+              <span class={selectedCountClass}>{effectiveSelectedCount}</span>
+              <span class="slds-text-body_small slds-text-color_weak"> / {effectiveMaxSelected}</span>
+            </div>
+          </div>
+        </div>
+        <div class="slds-col slds-size_1-of-2">
+          <div class="stat-card slds-box slds-theme_shade slds-p-around_small slds-text-align_center">
+            <div class="slds-text-title slds-truncate">Reserve Sessions</div>
+            <div class="slds-text-heading_large slds-m-top_xx-small">
+              <span class={reserveCountClass}>{effectiveReserveCount}</span>
+              <span class="slds-text-body_small slds-text-color_weak"> / {effectiveMaxReserve}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Distribution Chart -->
+      <template if:true={hasCategoryStats}>
+        <div class="slds-m-bottom_medium">
+          <h3 class="slds-text-heading_small slds-m-bottom_small">Sessions by Main Category</h3>
+          <div class="chart-container">
+            <canvas lwc:ref="categoryChart"></canvas>
+          </div>
+        </div>
+      </template>
+
+      <!-- Language Distribution Chart -->
+      <template if:true={hasLanguageStats}>
+        <div>
+          <h3 class="slds-text-heading_small slds-m-bottom_small">Sessions by Language</h3>
+          <div class="chart-container">
+            <canvas lwc:ref="languageChart"></canvas>
+          </div>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <template if:false={hasAnyStats}>
+        <div class="slds-text-align_center slds-p-around_large">
+          <lightning-icon icon-name="utility:info" size="large" class="slds-m-bottom_small"></lightning-icon>
+          <p class="slds-text-body_regular slds-text-color_weak">Select sessions to see distribution statistics</p>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>
