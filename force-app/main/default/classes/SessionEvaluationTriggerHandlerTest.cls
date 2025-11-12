@@ -17,11 +17,7 @@ private class SessionEvaluationTriggerHandlerTest {
     insert campaign;
 
     // Create 10 Sessions with required fields
-    List<Session__c> sessions = TestDataFactory.createSessions(
-      campaign.Id,
-      10,
-      true
-    );
+    List<Session__c> sessions = TestDataFactory.createSessions(campaign.Id, 10, true);
     for (Integer i = 0; i < sessions.size(); i++) {
       sessions[i].PrimarySpeakerName__c = 'Speaker ' + i;
       sessions[i].PrimarySpeakerEmail__c = 'speaker' + i + '@test.com';
@@ -29,19 +25,10 @@ private class SessionEvaluationTriggerHandlerTest {
     insert sessions;
 
     // Create Evaluator User
-    User evaluator = TestDataFactory.createUser(
-      'Test',
-      'Evaluator',
-      'evaluator' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
+    User evaluator = TestDataFactory.createUser('Test', 'Evaluator', 'evaluator' + System.currentTimeMillis() + '@test.com', 'Standard User');
     insert evaluator;
 
-    return new Map<String, Object>{
-      'campaign' => campaign,
-      'sessions' => sessions,
-      'evaluator' => evaluator
-    };
+    return new Map<String, Object>{ 'campaign' => campaign, 'sessions' => sessions, 'evaluator' => evaluator };
   }
 
   /**
@@ -105,15 +92,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(
-      10,
-      result.TotalAssigned__c,
-      'Total should be 10 (from flow)'
-    );
+    Assert.areEqual(10, result.TotalEvaluations__c, 'Total should be 10 (from flow)');
     Assert.areEqual(1, result.SubmittedCount__c, 'Submitted should be 1');
     Assert.areEqual(0, result.FlaggedCount__c, 'Flagged should be 0');
   }
@@ -164,15 +147,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then - 9 evaluations remain (10 from flow - 1 deleted)
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(
-      9,
-      result.TotalAssigned__c,
-      'Total should be 9 (10 - 1 deleted)'
-    );
+    Assert.areEqual(9, result.TotalEvaluations__c, 'Total should be 9 (10 - 1 deleted)');
     Assert.areEqual(0, result.SubmittedCount__c, 'Submitted should be 0');
     Assert.areEqual(0, result.FlaggedCount__c, 'Flagged should be 0');
   }
@@ -229,15 +208,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(
-      10,
-      result.TotalAssigned__c,
-      'Total should be 10 (from flow)'
-    );
+    Assert.areEqual(10, result.TotalEvaluations__c, 'Total should be 10 (from flow)');
     Assert.areEqual(2, result.SubmittedCount__c, 'Submitted should be 2');
     Assert.areEqual(0, result.FlaggedCount__c, 'Flagged should be 0');
   }
@@ -284,11 +259,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, result.TotalAssigned__c, 'Total should be 10');
+    Assert.areEqual(10, result.TotalEvaluations__c, 'Total should be 10');
     Assert.areEqual(10, result.SubmittedCount__c, 'Submitted should be 10');
     Assert.areEqual(0, result.FlaggedCount__c, 'Flagged should be 0');
   }
@@ -321,31 +296,19 @@ private class SessionEvaluationTriggerHandlerTest {
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(
-      evaluator.Id,
-      insertedRun.Evaluator__c,
-      'Evaluator__c should match evaluator user'
-    );
-    Assert.areEqual(
-      evaluator.Id,
-      insertedRun.OwnerId,
-      'OwnerId should match evaluator user'
-    );
+    Assert.areEqual(evaluator.Id, insertedRun.Evaluator__c, 'Evaluator__c should match evaluator user');
+    Assert.areEqual(evaluator.Id, insertedRun.OwnerId, 'OwnerId should match evaluator user');
 
     Test.startTest();
     System.runAs(evaluator) {
       // Verify initial state (flow creates evaluations with Status = 'Not Started')
       EvaluatorRun__c initialResult = [
-        SELECT TotalAssigned__c, SubmittedCount__c
+        SELECT TotalEvaluations__c, SubmittedCount__c
         FROM EvaluatorRun__c
         WHERE Id = :run.Id
       ];
-      Assert.areEqual(10, initialResult.TotalAssigned__c, 'Total should be 10');
-      Assert.areEqual(
-        0,
-        initialResult.SubmittedCount__c,
-        'Submitted should be 0'
-      );
+      Assert.areEqual(10, initialResult.TotalEvaluations__c, 'Total should be 10');
+      Assert.areEqual(0, initialResult.SubmittedCount__c, 'Submitted should be 0');
 
       // When - Update 5 to Submitted
       List<SessionEvaluation__c> evals = [
@@ -365,20 +328,12 @@ private class SessionEvaluationTriggerHandlerTest {
     Test.stopTest();
     // Then
     EvaluatorRun__c submittedResult = [
-      SELECT TotalAssigned__c, SubmittedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(
-      10,
-      submittedResult.TotalAssigned__c,
-      'Total should still be 10'
-    );
-    Assert.areEqual(
-      5,
-      submittedResult.SubmittedCount__c,
-      'Submitted should be 5'
-    );
+    Assert.areEqual(10, submittedResult.TotalEvaluations__c, 'Total should still be 10');
+    Assert.areEqual(5, submittedResult.SubmittedCount__c, 'Submitted should be 5');
   }
 
   /**
@@ -405,11 +360,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Verify initial state
     EvaluatorRun__c initialResult = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, initialResult.TotalAssigned__c, 'Total should be 10');
+    Assert.areEqual(10, initialResult.TotalEvaluations__c, 'Total should be 10');
     Assert.areEqual(0, initialResult.FlaggedCount__c, 'Flagged should be 0');
 
     // When - Flag 3 flow-created evaluations
@@ -434,11 +389,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c, FlaggedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, result.TotalAssigned__c, 'Total should be 10');
+    Assert.areEqual(10, result.TotalEvaluations__c, 'Total should be 10');
     Assert.areEqual(3, result.SubmittedCount__c, 'Submitted should be 3');
     Assert.areEqual(3, result.FlaggedCount__c, 'Flagged should be 3');
   }
@@ -548,16 +503,12 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Verify initial state
     EvaluatorRun__c initialResult = [
-      SELECT TotalAssigned__c, SubmittedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, initialResult.TotalAssigned__c, 'Total should be 10');
-    Assert.areEqual(
-      1,
-      initialResult.SubmittedCount__c,
-      'Submitted should be 1'
-    );
+    Assert.areEqual(10, initialResult.TotalEvaluations__c, 'Total should be 10');
+    Assert.areEqual(1, initialResult.SubmittedCount__c, 'Submitted should be 1');
 
     // Delete it
     System.runAs(evaluator) {
@@ -565,16 +516,12 @@ private class SessionEvaluationTriggerHandlerTest {
     }
 
     EvaluatorRun__c deletedResult = [
-      SELECT TotalAssigned__c, SubmittedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(9, deletedResult.TotalAssigned__c, 'Total should be 9');
-    Assert.areEqual(
-      0,
-      deletedResult.SubmittedCount__c,
-      'Submitted should be 0'
-    );
+    Assert.areEqual(9, deletedResult.TotalEvaluations__c, 'Total should be 9');
+    Assert.areEqual(0, deletedResult.SubmittedCount__c, 'Submitted should be 0');
 
     // When - Undelete
     Test.startTest();
@@ -585,11 +532,11 @@ private class SessionEvaluationTriggerHandlerTest {
 
     // Then
     EvaluatorRun__c result = [
-      SELECT TotalAssigned__c, SubmittedCount__c
+      SELECT TotalEvaluations__c, SubmittedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
     ];
-    Assert.areEqual(10, result.TotalAssigned__c, 'Total should be 10 again');
+    Assert.areEqual(10, result.TotalEvaluations__c, 'Total should be 10 again');
     Assert.areEqual(1, result.SubmittedCount__c, 'Submitted should be 1 again');
   }
 
@@ -605,33 +552,13 @@ private class SessionEvaluationTriggerHandlerTest {
     List<Session__c> sessions = (List<Session__c>) data.get('sessions');
     Campaign campaign = (Campaign) data.get('campaign');
 
-    User eval1 = TestDataFactory.createUser(
-      'Eval',
-      'UserOne',
-      'eval1' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
-    User eval2 = TestDataFactory.createUser(
-      'Eval',
-      'UserTwo',
-      'eval2' + System.currentTimeMillis() + '@test.com',
-      'Standard User'
-    );
+    User eval1 = TestDataFactory.createUser('Eval', 'UserOne', 'eval1' + System.currentTimeMillis() + '@test.com', 'Standard User');
+    User eval2 = TestDataFactory.createUser('Eval', 'UserTwo', 'eval2' + System.currentTimeMillis() + '@test.com', 'Standard User');
     insert new List<User>{ eval1, eval2 };
 
     // Create two runs - flow creates 10 evaluations for each
-    EvaluatorRun__c run1 = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = eval1.Id,
-      OwnerId = eval1.Id,
-      Status__c = 'In_Progress'
-    );
-    EvaluatorRun__c run2 = new EvaluatorRun__c(
-      Campaign__c = campaign.Id,
-      Evaluator__c = eval2.Id,
-      OwnerId = eval2.Id,
-      Status__c = 'In_Progress'
-    );
+    EvaluatorRun__c run1 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval1.Id, OwnerId = eval1.Id, Status__c = 'In_Progress');
+    EvaluatorRun__c run2 = new EvaluatorRun__c(Campaign__c = campaign.Id, Evaluator__c = eval2.Id, OwnerId = eval2.Id, Status__c = 'In_Progress');
     insert new List<EvaluatorRun__c>{ run1, run2 };
 
     // Verify flow created 10 evaluations for each run
@@ -685,23 +612,15 @@ private class SessionEvaluationTriggerHandlerTest {
     // Then
     Map<Id, EvaluatorRun__c> runs = new Map<Id, EvaluatorRun__c>(
       [
-        SELECT TotalAssigned__c, SubmittedCount__c
+        SELECT TotalEvaluations__c, SubmittedCount__c
         FROM EvaluatorRun__c
         WHERE Id IN (:run1.Id, :run2.Id)
       ]
     );
 
-    Assert.areEqual(10, runs.get(run1.Id).TotalAssigned__c, 'Run1 total = 10');
-    Assert.areEqual(
-      3,
-      runs.get(run1.Id).SubmittedCount__c,
-      'Run1 submitted = 3'
-    );
-    Assert.areEqual(10, runs.get(run2.Id).TotalAssigned__c, 'Run2 total = 10');
-    Assert.areEqual(
-      5,
-      runs.get(run2.Id).SubmittedCount__c,
-      'Run2 submitted = 5'
-    );
+    Assert.areEqual(10, runs.get(run1.Id).TotalEvaluations__c, 'Run1 total = 10');
+    Assert.areEqual(3, runs.get(run1.Id).SubmittedCount__c, 'Run1 submitted = 3');
+    Assert.areEqual(10, runs.get(run2.Id).TotalEvaluations__c, 'Run2 total = 10');
+    Assert.areEqual(5, runs.get(run2.Id).SubmittedCount__c, 'Run2 submitted = 5');
   }
 }

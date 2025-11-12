@@ -56,10 +56,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
    * @param newEvaluations List of new or updated evaluations
    * @param oldEvaluationsMap Map of old evaluation records (null for insert)
    */
-  private void handleEvaluationSubmission(
-    List<SessionEvaluation__c> newEvaluations,
-    Map<Id, SessionEvaluation__c> oldEvaluationsMap
-  ) {
+  private void handleEvaluationSubmission(List<SessionEvaluation__c> newEvaluations, Map<Id, SessionEvaluation__c> oldEvaluationsMap) {
     Set<Id> sessionsToAggregate = new Set<Id>();
     Set<Id> runsToUpdate = new Set<Id>();
 
@@ -67,9 +64,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
       // Only process if status is now Submitted
       if (evaluation.Status__c == 'Submitted') {
         // Check if this is a new submission (insert or status change)
-        Boolean isNewSubmission =
-          (oldEvaluationsMap == null) ||
-          (oldEvaluationsMap.get(evaluation.Id).Status__c != 'Submitted');
+        Boolean isNewSubmission = (oldEvaluationsMap == null) || (oldEvaluationsMap.get(evaluation.Id).Status__c != 'Submitted');
 
         if (isNewSubmission && evaluation.Session__c != null) {
           sessionsToAggregate.add(evaluation.Session__c);
@@ -113,9 +108,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
     List<EvaluatorRun__c> runsToUpdate = new List<EvaluatorRun__c>();
     for (Id runId : runIds) {
       Integer count = runCounts.containsKey(runId) ? runCounts.get(runId) : 0;
-      runsToUpdate.add(
-        new EvaluatorRun__c(Id = runId, SubmittedCount__c = count)
-      );
+      runsToUpdate.add(new EvaluatorRun__c(Id = runId, SubmittedCount__c = count));
     }
 
     if (!runsToUpdate.isEmpty()) {
@@ -129,10 +122,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
    * @param evaluations List of evaluations that changed
    * @param oldEvaluationsMap Map of old evaluation records (null for insert/undelete)
    */
-  private void updateEvaluatorRunCountsOnChange(
-    List<SessionEvaluation__c> evaluations,
-    Map<Id, SessionEvaluation__c> oldEvaluationsMap
-  ) {
+  private void updateEvaluatorRunCountsOnChange(List<SessionEvaluation__c> evaluations, Map<Id, SessionEvaluation__c> oldEvaluationsMap) {
     Set<Id> runIds = collectAffectedRunIds(evaluations, oldEvaluationsMap);
 
     if (runIds.isEmpty()) {
@@ -152,10 +142,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
    * @param oldEvaluationsMap Map of old evaluation records
    * @return Set of affected run IDs
    */
-  private Set<Id> collectAffectedRunIds(
-    List<SessionEvaluation__c> evaluations,
-    Map<Id, SessionEvaluation__c> oldEvaluationsMap
-  ) {
+  private Set<Id> collectAffectedRunIds(List<SessionEvaluation__c> evaluations, Map<Id, SessionEvaluation__c> oldEvaluationsMap) {
     Set<Id> runIds = new Set<Id>();
 
     // Collect current run IDs
@@ -169,11 +156,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
     if (oldEvaluationsMap != null) {
       for (SessionEvaluation__c evaluation : evaluations) {
         SessionEvaluation__c oldEval = oldEvaluationsMap.get(evaluation.Id);
-        if (
-          oldEval != null &&
-          oldEval.Run__c != null &&
-          oldEval.Run__c != evaluation.Run__c
-        ) {
+        if (oldEval != null && oldEval.Run__c != null && oldEval.Run__c != evaluation.Run__c) {
           runIds.add(oldEval.Run__c);
         }
       }
@@ -190,7 +173,6 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
   private Map<Id, EvaluatorRun__c> calculateRunCounts(Set<Id> runIds) {
     Map<Id, EvaluatorRun__c> runsToUpdate = initializeRunCounts(runIds);
 
-    aggregateTotalAssigned(runIds, runsToUpdate);
     aggregateSubmittedCount(runIds, runsToUpdate);
     aggregateFlaggedCount(runIds, runsToUpdate);
 
@@ -210,7 +192,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
         runId,
         new EvaluatorRun__c(
           Id = runId,
-          TotalAssigned__c = 0,
+          // TotalEvaluations__c is a rollup summary field and cannot be set from Apex.
           SubmittedCount__c = 0,
           FlaggedCount__c = 0
         )
@@ -220,35 +202,14 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
     return runsMap;
   }
 
-  /**
-   * @description Aggregates total assigned count for runs
-   * @param runIds Set of run IDs
-   * @param runsMap Map to update with counts
-   */
-  private void aggregateTotalAssigned(
-    Set<Id> runIds,
-    Map<Id, EvaluatorRun__c> runsMap
-  ) {
-    for (AggregateResult ar : [
-      SELECT Run__c, COUNT(Id) totalCount
-      FROM SessionEvaluation__c
-      WHERE Run__c IN :runIds
-      GROUP BY Run__c
-    ]) {
-      Id runId = (Id) ar.get('Run__c');
-      runsMap.get(runId).TotalAssigned__c = (Integer) ar.get('totalCount');
-    }
-  }
+  // TotalAssigned aggregation removed: TotalEvaluations__c is now a rollup summary field on EvaluatorRun__c
 
   /**
    * @description Aggregates submitted count for runs
    * @param runIds Set of run IDs
    * @param runsMap Map to update with counts
    */
-  private void aggregateSubmittedCount(
-    Set<Id> runIds,
-    Map<Id, EvaluatorRun__c> runsMap
-  ) {
+  private void aggregateSubmittedCount(Set<Id> runIds, Map<Id, EvaluatorRun__c> runsMap) {
     for (AggregateResult ar : [
       SELECT Run__c, COUNT(Id) submittedCount
       FROM SessionEvaluation__c
@@ -265,10 +226,7 @@ public without sharing class SessionEvaluationTriggerHandler extends TriggerHand
    * @param runIds Set of run IDs
    * @param runsMap Map to update with counts
    */
-  private void aggregateFlaggedCount(
-    Set<Id> runIds,
-    Map<Id, EvaluatorRun__c> runsMap
-  ) {
+  private void aggregateFlaggedCount(Set<Id> runIds, Map<Id, EvaluatorRun__c> runsMap) {
     for (AggregateResult ar : [
       SELECT Run__c, COUNT(Id) flaggedCount
       FROM SessionEvaluation__c

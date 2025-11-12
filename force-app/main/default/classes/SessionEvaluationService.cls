@@ -240,7 +240,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled
   public static void finalizeRun(Id runId) {
     EvaluatorRun__c run = [
-      SELECT Id, Status__c, AllSubmitted__c, FinalizedAt__c, SubmittedCount__c, TotalAssigned__c
+      SELECT Id, Status__c, AllSubmitted__c, FinalizedAt__c, SubmittedCount__c, TotalEvaluations__c
       FROM EvaluatorRun__c
       WHERE Id = :runId
       FOR UPDATE
@@ -252,7 +252,7 @@ public with sharing class SessionEvaluationService {
 
     // Optional: Check if all evaluations are submitted
     // Uncomment if you want to enforce this requirement
-    // if (run.SubmittedCount__c < run.TotalAssigned__c) {
+    // if (run.SubmittedCount__c < run.TotalEvaluations__c) {
     //   throw new AuraHandledException('Cannot finalize: Not all evaluations have been submitted');
     // }
 
@@ -285,7 +285,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled(cacheable=true)
   public static Boolean canFinalizeRun(Id runId) {
     EvaluatorRun__c run = [
-      SELECT Id, FinalizedAt__c, SubmittedCount__c, TotalAssigned__c
+      SELECT Id, FinalizedAt__c, SubmittedCount__c, TotalEvaluations__c
       FROM EvaluatorRun__c
       WHERE Id = :runId
       LIMIT 1
@@ -297,7 +297,7 @@ public with sharing class SessionEvaluationService {
     }
 
     // Can finalize if all evaluations are submitted
-    return run.SubmittedCount__c >= run.TotalAssigned__c && run.TotalAssigned__c > 0;
+    return run.SubmittedCount__c >= run.TotalEvaluations__c && run.TotalEvaluations__c > 0;
   }
 
   /**
@@ -415,7 +415,7 @@ public with sharing class SessionEvaluationService {
   @AuraEnabled(cacheable=true)
   public static Map<String, Object> getEvaluatorProgressByRun(Id runId) {
     EvaluatorRun__c run = [
-      SELECT Id, TotalAssigned__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
+      SELECT Id, TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
       FROM EvaluatorRun__c
       WHERE Id = :runId
       LIMIT 1
@@ -423,7 +423,7 @@ public with sharing class SessionEvaluationService {
 
     Map<String, Object> result = new Map<String, Object>();
     result.put('runId', run.Id);
-    result.put('targetCount', run.TotalAssigned__c);
+    result.put('targetCount', run.TotalEvaluations__c);
     result.put('submittedCount', run.SubmittedCount__c);
     result.put('flaggedCount', run.FlaggedCount__c);
     result.put('percentComplete', run.PercentComplete__c);
@@ -442,7 +442,7 @@ public with sharing class SessionEvaluationService {
     Id userId = UserInfo.getUserId();
 
     EvaluatorRun__c run = [
-      SELECT Id, TotalAssigned__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
+      SELECT Id, TotalEvaluations__c, SubmittedCount__c, FlaggedCount__c, PercentComplete__c, Status__c
       FROM EvaluatorRun__c
       WHERE Campaign__c = :campaignId AND Evaluator__c = :userId
       LIMIT 1
@@ -450,7 +450,7 @@ public with sharing class SessionEvaluationService {
 
     Map<String, Object> result = new Map<String, Object>();
     result.put('runId', run.Id);
-    result.put('targetCount', run.TotalAssigned__c);
+    result.put('targetCount', run.TotalEvaluations__c);
     result.put('submittedCount', run.SubmittedCount__c);
     result.put('flaggedCount', run.FlaggedCount__c);
     result.put('percentComplete', run.PercentComplete__c);

@@ -594,7 +594,7 @@ private class SessionEvaluationServiceTest {
   @IsTest
   static void testUpdateEvaluationScores_Finalized() {
     SessionEvaluation__c eval = [
-      SELECT Id, Evaluator__c
+      SELECT Id, Evaluator__c, Run__c
       FROM SessionEvaluation__c
       WHERE Status__c = 'Draft'
       LIMIT 1
@@ -607,26 +607,49 @@ private class SessionEvaluationServiceTest {
       LIMIT 1
     ];
 
-    // Finalize the evaluation (as evaluator to pass validation)
-    System.runAs(evalUser) {
-      eval.FinalizedSnapshot__c = true;
-      update eval;
-    }
+    // Finalize the Run to trigger validation rule
+    EvaluatorRun__c run = [
+      SELECT Id, Status__c
+      FROM EvaluatorRun__c
+      WHERE Id = :eval.Run__c
+      LIMIT 1
+    ];
+
+    run.Status__c = 'Finalized';
+    run.FinalizedAt__c = System.now();
+    update run;
+
+    // Verify run is actually finalized
+    EvaluatorRun__c verifyRun = [
+      SELECT Id, Status__c
+      FROM EvaluatorRun__c
+      WHERE Id = :eval.Run__c
+      LIMIT 1
+    ];
+    System.assertEquals('Finalized', verifyRun.Status__c, 'Run should be finalized before test');
 
     Test.startTest();
     Boolean exceptionThrown = false;
+    String exceptionMessage = '';
     try {
       System.runAs(evalUser) {
         SessionEvaluationService.updateEvaluationScores(eval.Id, 5, 5, 5, 'Try to update', false);
       }
       System.assert(false, 'Should have thrown exception for finalized evaluation');
-    } catch (Exception e) {
-      // Exception thrown as expected
+    } catch (DmlException e) {
+      // DML Exception thrown as expected (validation rule prevents update)
       exceptionThrown = true;
+      exceptionMessage = e.getMessage();
+      System.debug('DML Exception: ' + exceptionMessage);
+    } catch (Exception e) {
+      // Other exception
+      exceptionThrown = true;
+      exceptionMessage = e.getMessage();
+      System.debug('Other Exception: ' + exceptionMessage);
     }
     Test.stopTest();
 
-    System.assert(exceptionThrown, 'Should throw exception for finalized evaluation');
+    System.assert(exceptionThrown, 'Should throw exception for finalized evaluation. Message: ' + exceptionMessage);
   }
 
   @IsTest

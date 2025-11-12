@@ -41,9 +41,9 @@ private class EvaluatorRunFlowTest {
       System.assert(bySession.containsKey(s.Id), 'Expected SessionEvaluation for Session ' + s.Id);
     }
 
-    // Verify EvaluatorRun counters: TotalAssigned__c should equal 3
+    // Verify EvaluatorRun counters: TotalEvaluations__c should equal 3
     EvaluatorRun__c runReload = [
-      SELECT Id, TotalAssigned__c, SubmittedCount__c
+      SELECT Id, TotalEvaluations__c, SubmittedCount__c
       FROM EvaluatorRun__c
       WHERE Id = :run.Id
       LIMIT 1
@@ -51,8 +51,8 @@ private class EvaluatorRunFlowTest {
 
     System.assertEquals(
       3,
-      Integer.valueOf(runReload.TotalAssigned__c),
-      'EvaluatorRun TotalAssigned__c should equal number of created SessionEvaluations'
+      Integer.valueOf(runReload.TotalEvaluations__c),
+      'EvaluatorRun TotalEvaluations__c should equal number of created SessionEvaluations'
     );
 
     // SubmittedCount should remain 0 since evaluations are created as Not Started or Draft

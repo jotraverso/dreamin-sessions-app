@@ -232,7 +232,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>EvaluatorRun__c.TotalAssigned__c</field>
+        <field>EvaluatorRun__c.TotalEvaluations__c</field>
         <readable>true</readable>
     </fieldPermissions>
 </PermissionSet>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>TotalEvaluations__c</fullName>
+    <label>Total Evaluations</label>
+    <description>Automatically counts SessionEvaluation records related to this Evaluator Run (rollup summary).</description>
+    <inlineHelpText>Number of evaluations (count of SessionEvaluation records).</inlineHelpText>
+    <type>Summary</type>
+    <summaryForeignKey>SessionEvaluation__c.Run__c</summaryForeignKey>
+    <summaryOperation>count</summaryOperation>
+</CustomField>
