@@ -221,8 +221,9 @@ export default class SessionList extends LightningElement {
           // Refresh the page
           this.dispatchEvent(new RefreshEvent());
 
-          // Move to next if available
-          if (this.currentIndex > 0 && !this.isLastEvaluation) {
+          // Move to next if available. If the non-submitted-only filter is active,
+          // don't advance: applying the filter will surface the next item.
+          if (this.currentIndex > 0 && !this.isLastEvaluation && !this.showNonSubmittedOnly) {
             this.handleNext();
           }
         }, 500);
@@ -300,8 +301,9 @@ export default class SessionList extends LightningElement {
           // Refresh the page
           this.dispatchEvent(new RefreshEvent());
 
-          // Move to next if available
-          if (this.currentIndex > 0 && !this.isLastEvaluation) {
+          // Move to next if available. If the non-submitted-only filter is active,
+          // don't advance: applying the filter will surface the next item.
+          if (this.currentIndex > 0 && !this.isLastEvaluation && !this.showNonSubmittedOnly) {
             this.handleNext();
           }
         }, 500);
