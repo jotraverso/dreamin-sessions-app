@@ -23,8 +23,7 @@ export default class SelectionSummary extends LightningElement {
 
   // Wire campaign details when recordId is available
   @wire(getCampaignDetails, { campaignId: "$recordId" })
-  wiredCampaign({ response }) {
-    const data = response?.data;
+  wiredCampaign({ data }) {
     if (data && this.recordId) {
       this._campaign = data;
     }
@@ -32,8 +31,7 @@ export default class SelectionSummary extends LightningElement {
 
   // Wire sessions when recordId is available
   @wire(getSessions, { campaignId: "$recordId" })
-  wiredSessions({ response }) {
-    const data = response?.data;
+  wiredSessions({ data }) {
     if (data && this.recordId) {
       this._sessions = data;
     }

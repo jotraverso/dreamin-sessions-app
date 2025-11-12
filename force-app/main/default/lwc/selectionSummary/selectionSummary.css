@@ -1,3 +1,8 @@
+:host {
+  max-width: 550px;
+  display: block;
+}
+
 .stat-card {
   border-radius: 0.25rem;
 }
