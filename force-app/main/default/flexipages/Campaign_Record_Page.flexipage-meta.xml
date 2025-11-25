@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <FlexiPage xmlns="http://soap.sforce.com/2006/04/metadata">
     <flexiPageRegions>
         <itemInstances>
@@ -86,6 +86,12 @@
                 </componentInstanceProperties>
                 <componentName>force:relatedListSingleContainer</componentName>
                 <identifier>force_relatedListSingleContainer</identifier>
+            </componentInstance>
+        </itemInstances>
+        <itemInstances>
+            <componentInstance>
+                <componentName>evaluationProgressSummary</componentName>
+                <identifier>c_evaluationProgressSummary</identifier>
             </componentInstance>
         </itemInstances>
         <name>Facet-0cb0952e-cbb1-4668-a26b-11ff6cd35885</name>
@@ -210,6 +216,22 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
+                <componentInstanceProperties>
+                    <name>maxReserve</name>
+                    <value>0</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>maxSelected</name>
+                    <value>0</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>reserveCount</name>
+                    <value>0</value>
+                </componentInstanceProperties>
+                <componentInstanceProperties>
+                    <name>selectedCount</name>
+                    <value>0</value>
+                </componentInstanceProperties>
                 <componentName>selectionSummary</componentName>
                 <identifier>c_selectionSummary</identifier>
             </componentInstance>
