@@ -13,7 +13,7 @@
     },
     {
       "files": "*.xml",
-      "options": { "parser": "xml", "printWidth": 5000, "bracketSpacing": true }
+      "options": { "parser": "xml", "printWidth": 5000, "bracketSpacing": false, "xmlSelfClosingSpace": false }
     }
   ]
 }
