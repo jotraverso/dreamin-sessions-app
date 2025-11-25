@@ -78,6 +78,37 @@
                       rows="3"
                     ></lightning-textarea>
                   </div>
+                  <!-- Duplicate Matches Section -->
+                  <template if:true={speaker.duplicates}>
+                    <template if:true={speaker.duplicates.length}>
+                      <div class="slds-col slds-size_1-of-1 slds-m-top_small">
+                        <div class="slds-text-title slds-m-bottom_x-small">Possible Existing Contacts (Email Match)</div>
+                        <ul class="slds-has-dividers_bottom-space">
+                          <template for:each={speaker.duplicates} for:item="dup">
+                            <li key={dup.contactId} class="slds-item">
+                              <div class="slds-grid slds-grid_align-spread slds-p-around_x-small">
+                                <div>
+                                  <strong>{dup.name}</strong><br />
+                                  <span class="slds-text-color_weak">{dup.email}</span>
+                                  <template if:true={dup.title}> <br /><span>{dup.title}</span> </template>
+                                </div>
+                                <div class="slds-align_absolute-center">
+                                  <lightning-button
+                                    variant="neutral"
+                                    label="Link"
+                                    title="Link session speaker to this contact"
+                                    data-index={index}
+                                    data-contactid={dup.contactId}
+                                    onclick={handleLinkDuplicate}
+                                  ></lightning-button>
+                                </div>
+                              </div>
+                            </li>
+                          </template>
+                        </ul>
+                      </div>
+                    </template>
+                  </template>
                   <template if:true={showIndividualButtons}>
                     <div class="slds-col slds-size_1-of-1 slds-text-align_right">
                       <lightning-button

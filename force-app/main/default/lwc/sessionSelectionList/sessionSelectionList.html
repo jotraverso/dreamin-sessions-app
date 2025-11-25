@@ -28,7 +28,7 @@
     <div class="slds-p-around_small">
       <template if:true={hasSessions}>
         <template for:each={displayedSessions} for:item="session" for:index="index">
-          <div key={session.id} class="slds-m-bottom_small session-row" data-index={index}>
+          <div key={session.id} class="slds-m-bottom_small slds-p-around_x-small session-row" data-index={index}>
             <c-session-item
               session={session}
               categories={categories}

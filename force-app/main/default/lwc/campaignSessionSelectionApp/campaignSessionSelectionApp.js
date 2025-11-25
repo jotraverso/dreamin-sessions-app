@@ -124,43 +124,92 @@ export default class CampaignSessionSelectionApp extends LightningElement {
     return categories[0] || null;
   }
 
+  // Selection limit validation
+  validateSelectionLimits(selectionStatus, isStatusChanging) {
+    if (isStatusChanging && selectionStatus === "Selected" && this.selectedCount >= this.campaign.maxSelectedSessions) {
+      this.showErrorToast(`Cannot select more than ${this.campaign.maxSelectedSessions} sessions`);
+      return false;
+    }
+    if (isStatusChanging && selectionStatus === "Reserve" && this.reserveCount >= this.campaign.maxReserveSessions) {
+      this.showErrorToast(`Cannot mark more than ${this.campaign.maxReserveSessions} sessions as reserve`);
+      return false;
+    }
+    return true;
+  }
+
+  // Duplicate contact detection across selected sessions
+  checkDuplicateSpeakerContacts(sessionId, session) {
+    const dupMessages = [];
+    const { primarySpeakerContactId, coSpeakerContactId } = session;
+
+    if (primarySpeakerContactId) {
+      const match = this.findDuplicateContactSession(sessionId, primarySpeakerContactId);
+      if (match) {
+        const role = match.primarySpeakerContactId === primarySpeakerContactId ? "primary" : "co-speaker";
+        dupMessages.push(`Primary speaker also linked as ${role} on '${match.title || match.name}'`);
+      }
+    }
+
+    if (coSpeakerContactId) {
+      const match = this.findDuplicateContactSession(sessionId, coSpeakerContactId);
+      if (match) {
+        const role = match.primarySpeakerContactId === coSpeakerContactId ? "primary" : "co-speaker";
+        dupMessages.push(`Co-speaker also linked as ${role} on '${match.title || match.name}'`);
+      }
+    }
+
+    if (dupMessages.length > 0) {
+      this.showWarningToast(`Contact duplication detected: ${dupMessages.join("; ")}`);
+    }
+  }
+
+  // Find another selected session with the same contact ID
+  findDuplicateContactSession(excludeSessionId, contactId) {
+    return this.sessions.find(
+      (s) =>
+        s.id !== excludeSessionId &&
+        s.selectionStatus === "Selected" &&
+        (s.primarySpeakerContactId === contactId || s.coSpeakerContactId === contactId)
+    );
+  }
+
+  // Update local session state
+  updateLocalSessionState(sessionId, selectionStatus, mainCategory) {
+    this.sessions = this.sessions.map((session) => (session.id === sessionId ? { ...session, selectionStatus, mainCategory } : session));
+    this.filteredSessions = [...this.sessions];
+  }
+
+  // Persist session selection to server
+  async saveSessionSelection(sessionId, selectionStatus, mainCategory) {
+    const updates = [{ id: sessionId, selectionStatus, mainCategory }];
+    await updateSessionSelections({ sessionUpdates: updates });
+    await refreshApex(this.wiredSessionsResult);
+  }
+
   // Event handlers
   async handleSelectionChange(event) {
     const { sessionId, selectionStatus, mainCategory, isAutoToggle } = event.detail;
     console.log("Selection change event received:", { sessionId, selectionStatus, mainCategory, isAutoToggle });
 
-    // Don't validate limits if this is an auto-toggle from the child component
     if (!isAutoToggle) {
-      // Validate limits before updating
-      if (selectionStatus === "Selected" && this.selectedCount >= this.campaign.maxSelectedSessions) {
-        this.showErrorToast(`Cannot select more than ${this.campaign.maxSelectedSessions} sessions`);
+      const previousSession = this.sessions.find((s) => s.id === sessionId);
+      const isStatusChanging = previousSession?.selectionStatus !== selectionStatus;
+
+      if (!this.validateSelectionLimits(selectionStatus, isStatusChanging)) {
         return;
       }
 
-      if (selectionStatus === "Reserve" && this.reserveCount >= this.campaign.maxReserveSessions) {
-        this.showErrorToast(`Cannot mark more than ${this.campaign.maxReserveSessions} sessions as reserve`);
-        return;
+      if (isStatusChanging && selectionStatus === "Selected" && previousSession) {
+        this.checkDuplicateSpeakerContacts(sessionId, previousSession);
       }
     }
 
-    // Update local state
-    this.sessions = this.sessions.map((session) => {
-      if (session.id === sessionId) {
-        return { ...session, selectionStatus, mainCategory };
-      }
-      return session;
-    });
-    this.filteredSessions = [...this.sessions];
+    this.updateLocalSessionState(sessionId, selectionStatus, mainCategory);
 
-    // Auto-save the change immediately
     try {
       console.log("Saving session update...");
-      const updates = [{ id: sessionId, selectionStatus, mainCategory }];
-      await updateSessionSelections({ sessionUpdates: updates });
+      await this.saveSessionSelection(sessionId, selectionStatus, mainCategory);
       console.log("Save successful");
-
-      // Refresh sessions data
-      await refreshApex(this.wiredSessionsResult);
     } catch (error) {
       console.error("Error saving session:", error);
       this.showErrorToast("Error saving session: " + (error.body?.message || error.message));
@@ -196,7 +245,20 @@ export default class CampaignSessionSelectionApp extends LightningElement {
   handleSpeakersConverted() {
     this.showConvertModal = false;
     this.selectedSessionId = null;
-    this.showSuccessToast("Speakers converted to contacts successfully");
+    // Refresh sessions so newly linked contact IDs are available for duplicate detection
+    if (this.wiredSessionsResult) {
+      refreshApex(this.wiredSessionsResult)
+        .then(() => {
+          this.filteredSessions = [...this.sessions];
+          this.showSuccessToast("Speakers converted to contacts successfully");
+        })
+        .catch((error) => {
+          console.error("Error refreshing sessions after conversion", error);
+          this.showWarningToast("Converted but failed to refresh sessions; warnings may be delayed");
+        });
+    } else {
+      this.showSuccessToast("Speakers converted to contacts successfully");
+    }
   }
 
   handleShowToast(event) {

@@ -1,7 +1,11 @@
-.session-row:nth-child(odd) {
-  background-color: #f3d9b6;
+.session-row {
+  border: 1px solid #dddbda; /* subtle divider */
+  border-radius: 0.25rem;
+  background-clip: padding-box;
+  box-shadow: 0 1px 0 0 #f3f2f2; /* light separation shadow */
+  background-color: #ffffff; /* unified background */
 }
 
-.session-row:nth-child(even) {
-  background-color: #ffffff;
+.session-row + .session-row {
+  margin-top: 0.5rem; /* vertical spacing between rows */
 }

@@ -43,6 +43,10 @@ public with sharing class CampaignSessionController {
     public String coSpeakerName;
     @AuraEnabled
     public String coSpeakerEmail;
+    @AuraEnabled
+    public Id primarySpeakerContactId;
+    @AuraEnabled
+    public Id coSpeakerContactId;
   }
 
   /**
@@ -75,6 +79,24 @@ public with sharing class CampaignSessionController {
     public Boolean isPrimary;
     @AuraEnabled
     public Id contactId;
+    @AuraEnabled
+    public List<ContactMatchWrapper> duplicates; // potential duplicate contacts
+  }
+
+  /**
+   * @description Wrapper for potential duplicate contact matches
+   */
+  public class ContactMatchWrapper {
+    @AuraEnabled
+    public Id contactId;
+    @AuraEnabled
+    public String name;
+    @AuraEnabled
+    public String email;
+    @AuraEnabled
+    public String title;
+    @AuraEnabled
+    public String description;
   }
 
   /**
@@ -85,6 +107,9 @@ public with sharing class CampaignSessionController {
   @AuraEnabled(cacheable=true)
   public static CampaignWrapper getCampaignDetails(Id campaignId) {
     try {
+      if (!Schema.sObjectType.Campaign.isAccessible()) {
+        throw new AuraHandledException('Insufficient access to Campaign');
+      }
       Campaign camp = [
         SELECT Id, Name, MaxSelectedSessions__c, MaxReserveSessions__c
         FROM Campaign
@@ -112,6 +137,9 @@ public with sharing class CampaignSessionController {
   @AuraEnabled(cacheable=true)
   public static List<SessionWrapper> getSessions(Id campaignId) {
     try {
+      if (!Schema.sObjectType.Session__c.isAccessible()) {
+        throw new AuraHandledException('Insufficient access to Session__c');
+      }
       List<Session__c> sessions = [
         SELECT
           Id,
@@ -131,7 +159,9 @@ public with sharing class CampaignSessionController {
           PrimarySpeakerName__c,
           PrimarySpeakerEmail__c,
           CoSpeakerName__c,
-          CoSpeakerEmail__c
+          CoSpeakerEmail__c,
+          PrimarySpeakerContact__c,
+          CoSpeakerContact__c
         FROM Session__c
         WHERE Campaign__c = :campaignId
         ORDER BY FinalScore__c DESC NULLS LAST
@@ -158,6 +188,8 @@ public with sharing class CampaignSessionController {
         wrapper.primarySpeakerEmail = session.PrimarySpeakerEmail__c;
         wrapper.coSpeakerName = session.CoSpeakerName__c;
         wrapper.coSpeakerEmail = session.CoSpeakerEmail__c;
+        wrapper.primarySpeakerContactId = session.PrimarySpeakerContact__c;
+        wrapper.coSpeakerContactId = session.CoSpeakerContact__c;
         wrappers.add(wrapper);
       }
 
@@ -176,6 +208,9 @@ public with sharing class CampaignSessionController {
   @AuraEnabled
   public static void updateSessionSelection(Id sessionId, String selectionStatus, String mainCategory) {
     try {
+      if (!Schema.sObjectType.Session__c.isUpdateable()) {
+        throw new AuraHandledException('Insufficient permissions to update Session__c');
+      }
       Session__c session = new Session__c(Id = sessionId, Selection_Status__c = selectionStatus, MainCategory__c = mainCategory);
       update session;
     } catch (Exception e) {
@@ -190,6 +225,9 @@ public with sharing class CampaignSessionController {
   @AuraEnabled
   public static void updateSessionSelections(List<Map<String, Object>> sessionUpdates) {
     try {
+      if (!Schema.sObjectType.Session__c.isUpdateable()) {
+        throw new AuraHandledException('Insufficient permissions to update Session__c');
+      }
       List<Session__c> sessionsToUpdate = new List<Session__c>();
 
       for (Map<String, Object> sessionData : sessionUpdates) {
@@ -217,6 +255,9 @@ public with sharing class CampaignSessionController {
   @AuraEnabled
   public static List<SpeakerWrapper> getSessionSpeakers(Id sessionId) {
     try {
+      if (!Schema.sObjectType.Session__c.isAccessible()) {
+        throw new AuraHandledException('Insufficient access to Session__c');
+      }
       Session__c session = [
         SELECT
           Id,
@@ -245,6 +286,9 @@ public with sharing class CampaignSessionController {
         primary.bio = session.PrimarySpeakerBio__c;
         primary.isPrimary = true;
         primary.contactId = session.PrimarySpeakerContact__c;
+        if (primary.contactId == null && String.isNotBlank(primary.email)) {
+          primary.duplicates = getSpeakerDuplicates(primary.email);
+        }
         speakers.add(primary);
       }
 
@@ -256,6 +300,9 @@ public with sharing class CampaignSessionController {
         coSpeaker.bio = session.CoSpeakerBio__c;
         coSpeaker.isPrimary = false;
         coSpeaker.contactId = session.CoSpeakerContact__c;
+        if (coSpeaker.contactId == null && String.isNotBlank(coSpeaker.email)) {
+          coSpeaker.duplicates = getSpeakerDuplicates(coSpeaker.email);
+        }
         speakers.add(coSpeaker);
       }
 
@@ -263,6 +310,76 @@ public with sharing class CampaignSessionController {
     } catch (Exception e) {
       throw new AuraHandledException('Error fetching speakers: ' + e.getMessage());
     }
+  }
+
+  /**
+   * @description Find potential duplicate contacts by exact email match
+   * @param email Email to search
+   * @return List of ContactMatchWrapper
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<ContactMatchWrapper> getSpeakerDuplicates(String email) {
+    if (String.isBlank(email)) {
+      return new List<ContactMatchWrapper>();
+    }
+    if (!Schema.sObjectType.Contact.isAccessible()) {
+      throw new AuraHandledException('Insufficient access to Contact');
+    }
+    List<Contact> contacts = [
+      SELECT Id, FirstName, LastName, Email, Title, Description
+      FROM Contact
+      WHERE Email = :email
+      LIMIT 5
+    ];
+    List<ContactMatchWrapper> matches = new List<ContactMatchWrapper>();
+    for (Contact c : contacts) {
+      ContactMatchWrapper wrap = new ContactMatchWrapper();
+      wrap.contactId = c.Id;
+      wrap.name = (c.FirstName != null ? c.FirstName + ' ' : '') + c.LastName;
+      wrap.email = c.Email;
+      wrap.title = c.Title;
+      wrap.description = c.Description;
+      matches.add(wrap);
+    }
+    return matches;
+  }
+
+  /**
+   * @description Link an existing contact to session speaker and copy its data into session fields
+   * @param sessionId Session record Id
+   * @param contactId Existing Contact Id
+   * @param isPrimary True if linking primary speaker, false for co-speaker
+   * @return Updated Contact Id
+   */
+  @AuraEnabled
+  public static Id linkSessionSpeakerToContact(Id sessionId, Id contactId, Boolean isPrimary) {
+    if (sessionId == null || contactId == null) {
+      throw new AuraHandledException('Missing sessionId or contactId');
+    }
+    if (!Schema.sObjectType.Contact.isAccessible()) {
+      throw new AuraHandledException('Insufficient access to Contact');
+    }
+    if (!Schema.sObjectType.Session__c.isUpdateable()) {
+      throw new AuraHandledException('Insufficient permissions to update Session__c');
+    }
+    Contact c = [SELECT Id, FirstName, LastName, Email, Title, Description FROM Contact WHERE Id = :contactId LIMIT 1];
+    Session__c sessionToUpdate = new Session__c(Id = sessionId);
+    String fullName = (c.FirstName != null ? c.FirstName + ' ' : '') + c.LastName;
+    if (isPrimary) {
+      sessionToUpdate.PrimarySpeakerContact__c = c.Id;
+      sessionToUpdate.PrimarySpeakerName__c = fullName;
+      sessionToUpdate.PrimarySpeakerEmail__c = c.Email;
+      sessionToUpdate.PrimarySpeakerJobTitle__c = c.Title;
+      sessionToUpdate.PrimarySpeakerBio__c = c.Description;
+    } else {
+      sessionToUpdate.CoSpeakerContact__c = c.Id;
+      sessionToUpdate.CoSpeakerName__c = fullName;
+      sessionToUpdate.CoSpeakerEmail__c = c.Email;
+      sessionToUpdate.CoSpeakerJobTitle__c = c.Title;
+      sessionToUpdate.CoSpeakerBio__c = c.Description;
+    }
+    update sessionToUpdate;
+    return c.Id;
   }
 
   /**
@@ -274,52 +391,47 @@ public with sharing class CampaignSessionController {
    * @return Contact Id (created or updated)
    */
   @AuraEnabled
-  public static Id convertSpeakerToContact(Id sessionId, Map<String, String> speakerData, Boolean isPrimary, Id existingContactId) {
+  public static Id convertSpeakerToContact(Id sessionId, Map<String, Object> speakerPayload) {
     try {
-      Contact contact;
+      if (!Schema.sObjectType.Contact.isCreateable() && !Schema.sObjectType.Contact.isUpdateable()) {
+        throw new AuraHandledException('Insufficient permissions to modify Contact');
+      }
+      if (!Schema.sObjectType.Session__c.isUpdateable()) {
+        throw new AuraHandledException('Insufficient permissions to update Session__c');
+      }
+      Boolean isPrimary = (Boolean) speakerPayload.get('isPrimary');
+      Id existingContactId = (Id) speakerPayload.get('existingContactId');
+      String firstName = (String) speakerPayload.get('firstName');
+      String lastName = (String) speakerPayload.get('lastName');
+      String email = (String) speakerPayload.get('email');
+      String jobTitle = (String) speakerPayload.get('jobTitle');
+      String bio = (String) speakerPayload.get('bio');
 
+      Contact contact;
       if (existingContactId != null) {
-        // Update existing contact
-        contact = new Contact(
-          Id = existingContactId,
-          FirstName = speakerData.get('firstName'),
-          LastName = speakerData.get('lastName'),
-          Email = speakerData.get('email'),
-          Title = speakerData.get('jobTitle'),
-          Description = speakerData.get('bio')
-        );
+        contact = new Contact(Id = existingContactId, FirstName = firstName, LastName = lastName, Email = email, Title = jobTitle, Description = bio);
         update contact;
       } else {
-        // Create new contact
-        contact = new Contact(
-          FirstName = speakerData.get('firstName'),
-          LastName = speakerData.get('lastName'),
-          Email = speakerData.get('email'),
-          Title = speakerData.get('jobTitle'),
-          Description = speakerData.get('bio')
-        );
+        contact = new Contact(FirstName = firstName, LastName = lastName, Email = email, Title = jobTitle, Description = bio);
         insert contact;
       }
 
-      // Update the session with the contact ID and speaker information
-      String fullName = speakerData.get('firstName') + ' ' + speakerData.get('lastName');
+      String fullName = firstName + ' ' + lastName;
       Session__c sessionToUpdate = new Session__c(Id = sessionId);
-
       if (isPrimary) {
         sessionToUpdate.PrimarySpeakerContact__c = contact.Id;
         sessionToUpdate.PrimarySpeakerName__c = fullName;
-        sessionToUpdate.PrimarySpeakerEmail__c = speakerData.get('email');
-        sessionToUpdate.PrimarySpeakerJobTitle__c = speakerData.get('jobTitle');
-        sessionToUpdate.PrimarySpeakerBio__c = speakerData.get('bio');
+        sessionToUpdate.PrimarySpeakerEmail__c = email;
+        sessionToUpdate.PrimarySpeakerJobTitle__c = jobTitle;
+        sessionToUpdate.PrimarySpeakerBio__c = bio;
       } else {
         sessionToUpdate.CoSpeakerContact__c = contact.Id;
         sessionToUpdate.CoSpeakerName__c = fullName;
-        sessionToUpdate.CoSpeakerEmail__c = speakerData.get('email');
-        sessionToUpdate.CoSpeakerJobTitle__c = speakerData.get('jobTitle');
-        sessionToUpdate.CoSpeakerBio__c = speakerData.get('bio');
+        sessionToUpdate.CoSpeakerEmail__c = email;
+        sessionToUpdate.CoSpeakerJobTitle__c = jobTitle;
+        sessionToUpdate.CoSpeakerBio__c = bio;
       }
       update sessionToUpdate;
-
       return contact.Id;
     } catch (Exception e) {
       throw new AuraHandledException('Error converting speaker: ' + e.getMessage());

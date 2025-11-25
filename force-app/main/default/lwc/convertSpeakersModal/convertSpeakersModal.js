@@ -2,6 +2,7 @@ import { LightningElement, api, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getSessionSpeakers from "@salesforce/apex/CampaignSessionController.getSessionSpeakers";
 import convertSpeakerToContact from "@salesforce/apex/CampaignSessionController.convertSpeakerToContact";
+import linkSessionSpeakerToContact from "@salesforce/apex/CampaignSessionController.linkSessionSpeakerToContact";
 
 export default class ConvertSpeakersModal extends LightningElement {
   @api sessionId;
@@ -47,6 +48,7 @@ export default class ConvertSpeakersModal extends LightningElement {
         isPrimary: speaker.isPrimary,
         speakerTypeLabel: speaker.isPrimary ? "Primary Speaker" : "Co-Speaker",
         contactId: speaker.contactId,
+        duplicates: speaker.duplicates || [],
         buttonLabel: speaker.contactId ? "Update Contact" : "Create Contact",
         error: null,
         converting: false
@@ -152,9 +154,15 @@ export default class ConvertSpeakersModal extends LightningElement {
 
       const contactId = await convertSpeakerToContact({
         sessionId: this.sessionId,
-        speakerData: speakerData,
-        isPrimary: speaker.isPrimary,
-        existingContactId: speaker.contactId
+        speakerPayload: {
+          firstName: speakerData.firstName,
+          lastName: speakerData.lastName,
+          email: speakerData.email,
+          jobTitle: speakerData.jobTitle,
+          bio: speakerData.bio,
+          isPrimary: speaker.isPrimary,
+          existingContactId: speaker.contactId
+        }
       });
 
       this.updateSpeaker(index, { contactId: contactId, converting: false });
@@ -186,6 +194,28 @@ export default class ConvertSpeakersModal extends LightningElement {
       }
       return speaker;
     });
+  }
+
+  async handleLinkDuplicate(event) {
+    const index = parseInt(event.target.dataset.index, 10);
+    const contactId = event.target.dataset.contactid;
+    const speaker = this.speakers[index];
+    if (!contactId) return;
+    this.updateSpeaker(index, { converting: true, error: null });
+    try {
+      await linkSessionSpeakerToContact({
+        sessionId: this.sessionId,
+        contactId: contactId,
+        isPrimary: speaker.isPrimary
+      });
+      // Reload speakers to get refreshed data (including removed duplicates list now that it's linked)
+      await this.loadSpeakers();
+      this.showSuccessToast(`${speaker.speakerTypeLabel} linked to existing Contact`);
+    } catch (error) {
+      const errorMessage = error.body?.message || error.message;
+      this.updateSpeaker(index, { error: errorMessage, converting: false });
+      this.showErrorToast(`Error linking ${speaker.speakerTypeLabel}: ` + errorMessage);
+    }
   }
 
   allSpeakersConverted() {
