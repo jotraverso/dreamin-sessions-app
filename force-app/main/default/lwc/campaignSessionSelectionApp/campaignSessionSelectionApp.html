@@ -13,33 +13,63 @@
       </div>
 
       <template if:true={effectiveCampaignId}>
-        <!-- Main Content Area -->
-        <div class={mainContentColumnClass}>
-          <c-session-selection-list
-            sessions={filteredSessions}
-            categories={categoryOptions}
-            selected-count={selectedCount}
-            reserve-count={reserveCount}
-            max-selected={campaign.maxSelectedSessions}
-            max-reserve={campaign.maxReserveSessions}
-            onselectionchange={handleSelectionChange}
-            onviewdetails={handleViewDetails}
-            onconvertspeakers={handleConvertSpeakers}
-            onshowtoast={handleShowToast}
-          ></c-session-selection-list>
+        <!-- Evaluation Progress Summary -->
+        <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small slds-m-bottom_small">
+          <c-evaluation-progress-summary evaluation-progress={evaluationProgress}></c-evaluation-progress-summary>
         </div>
 
-        <!-- Summary Section - Only show in standalone app mode -->
-        <template if:false={hasRecordId}>
-          <div class="slds-col slds-size_1-of-3 slds-p-horizontal_small">
-            <c-selection-summary
+        <!-- Main Content Area -->
+        <template if:true={allEvaluationsComplete}>
+          <div class={mainContentColumnClass}>
+            <c-session-selection-list
+              sessions={filteredSessions}
+              categories={categoryOptions}
               selected-count={selectedCount}
               reserve-count={reserveCount}
               max-selected={campaign.maxSelectedSessions}
               max-reserve={campaign.maxReserveSessions}
-              category-stats={categoryStats}
-              language-stats={languageStats}
-            ></c-selection-summary>
+              onselectionchange={handleSelectionChange}
+              onviewdetails={handleViewDetails}
+              onconvertspeakers={handleConvertSpeakers}
+              onshowtoast={handleShowToast}
+            ></c-session-selection-list>
+          </div>
+
+          <!-- Summary Section - Only show in standalone app mode -->
+          <template if:false={hasRecordId}>
+            <div class="slds-col slds-size_1-of-3 slds-p-horizontal_small">
+              <c-selection-summary
+                selected-count={selectedCount}
+                reserve-count={reserveCount}
+                max-selected={campaign.maxSelectedSessions}
+                max-reserve={campaign.maxReserveSessions}
+                category-stats={categoryStats}
+                language-stats={languageStats}
+              ></c-selection-summary>
+            </div>
+          </template>
+        </template>
+
+        <!-- Blocked Message when evaluations are not complete -->
+        <template if:false={allEvaluationsComplete}>
+          <div class="slds-col slds-size_1-of-1 slds-p-horizontal_small">
+            <div class="slds-illustration slds-illustration_small">
+              <div class="slds-text-longform">
+                <div class="slds-box slds-theme_shade slds-text-align_center slds-p-around_large">
+                  <lightning-icon icon-name="utility:lock" size="large" alternative-text="Locked" class="slds-m-bottom_medium"></lightning-icon>
+                  <h3 class="slds-text-heading_medium slds-m-bottom_small">Session Selection Locked</h3>
+                  <p class="slds-text-body_regular slds-text-color_weak">
+                    <template if:true={hasEvaluationProgress}>
+                      All evaluations must be 100% complete before you can access the session selection. Please check the progress summary above and
+                      ensure all evaluators have completed their reviews.
+                    </template>
+                    <template if:false={hasEvaluationProgress}>
+                      No evaluator runs found for this campaign. Please create evaluator runs before proceeding with session selection.
+                    </template>
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </template>
       </template>

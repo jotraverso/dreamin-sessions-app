@@ -5,6 +5,7 @@ import getCampaignDetails from "@salesforce/apex/CampaignSessionController.getCa
 import getSessions from "@salesforce/apex/CampaignSessionController.getSessions";
 import updateSessionSelections from "@salesforce/apex/CampaignSessionController.updateSessionSelections";
 import getCategoryPicklistValues from "@salesforce/apex/CampaignSessionController.getCategoryPicklistValues";
+import getEvaluationProgress from "@salesforce/apex/CampaignSessionController.getEvaluationProgress";
 
 export default class CampaignSessionSelectionApp extends LightningElement {
   @api recordId; // Campaign Id from the Lightning page
@@ -16,12 +17,14 @@ export default class CampaignSessionSelectionApp extends LightningElement {
   @track categoryOptions = [];
   @track selectedSession = null;
   @track selectedSessionId = null;
+  @track evaluationProgress = [];
 
   showDetailsModal = false;
   showConvertModal = false;
 
   // Store wired results for refresh
   wiredSessionsResult;
+  wiredEvaluationProgressResult;
 
   // Compute effective campaign ID
   get effectiveCampaignId() {
@@ -74,6 +77,18 @@ export default class CampaignSessionSelectionApp extends LightningElement {
     }
   }
 
+  // Wire evaluation progress for all evaluator runs
+  @wire(getEvaluationProgress, { campaignId: "$effectiveCampaignId" })
+  wiredEvaluationProgress(result) {
+    this.wiredEvaluationProgressResult = result;
+    const { error, data } = result;
+    if (data) {
+      this.evaluationProgress = data;
+    } else if (error) {
+      console.error("Error loading evaluation progress:", error);
+    }
+  }
+
   // Computed properties
   get selectedCount() {
     return this.sessions.filter((s) => s.selectionStatus === "Selected").length;
@@ -115,6 +130,18 @@ export default class CampaignSessionSelectionApp extends LightningElement {
 
   get hasAnyStats() {
     return this.hasCategoryStats || this.hasLanguageStats;
+  }
+
+  // Check if all evaluations are complete (required to show session list)
+  get allEvaluationsComplete() {
+    if (!this.evaluationProgress || this.evaluationProgress.length === 0) {
+      return false; // No evaluations = not complete
+    }
+    return this.evaluationProgress.every((run) => run.isComplete);
+  }
+
+  get hasEvaluationProgress() {
+    return this.evaluationProgress && this.evaluationProgress.length > 0;
   }
 
   // Helper method to get first category from multiselect

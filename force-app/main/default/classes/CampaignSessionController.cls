@@ -100,6 +100,34 @@ public with sharing class CampaignSessionController {
   }
 
   /**
+   * @description Wrapper for evaluation run progress summary
+   */
+  public class EvaluationProgressWrapper {
+    @AuraEnabled
+    public Id runId;
+    @AuraEnabled
+    public String runName;
+    @AuraEnabled
+    public Id evaluatorId;
+    @AuraEnabled
+    public String evaluatorName;
+    @AuraEnabled
+    public String status;
+    @AuraEnabled
+    public Integer totalEvaluations;
+    @AuraEnabled
+    public Integer submittedCount;
+    @AuraEnabled
+    public Integer flaggedCount;
+    @AuraEnabled
+    public Decimal percentComplete;
+    @AuraEnabled
+    public Datetime lastModifiedDate;
+    @AuraEnabled
+    public Boolean isComplete;
+  }
+
+  /**
    * @description Get campaign details by Id
    * @param campaignId Campaign record Id
    * @return CampaignWrapper with campaign data
@@ -490,5 +518,56 @@ public with sharing class CampaignSessionController {
     }
 
     return categories;
+  }
+
+  /**
+   * @description Get evaluation progress for all evaluator runs in a campaign
+   * @param campaignId Campaign record Id
+   * @return List of EvaluationProgressWrapper with progress data for each evaluator
+   */
+  @AuraEnabled(cacheable=true)
+  public static List<EvaluationProgressWrapper> getEvaluationProgress(Id campaignId) {
+    if (campaignId == null) {
+      return new List<EvaluationProgressWrapper>();
+    }
+    if (!Schema.sObjectType.EvaluatorRun__c.isAccessible()) {
+      throw new AuraHandledException('Insufficient access to EvaluatorRun__c');
+    }
+
+    List<EvaluatorRun__c> runs = [
+      SELECT
+        Id,
+        Name,
+        Evaluator__c,
+        Evaluator__r.Name,
+        Status__c,
+        TotalEvaluations__c,
+        SubmittedCount__c,
+        FlaggedCount__c,
+        PercentComplete__c,
+        LastModifiedDate
+      FROM EvaluatorRun__c
+      WHERE Campaign__c = :campaignId
+      ORDER BY Evaluator__r.Name ASC
+    ];
+
+    List<EvaluationProgressWrapper> results = new List<EvaluationProgressWrapper>();
+    for (EvaluatorRun__c run : runs) {
+      EvaluationProgressWrapper wrapper = new EvaluationProgressWrapper();
+      wrapper.runId = run.Id;
+      wrapper.runName = run.Name;
+      wrapper.evaluatorId = run.Evaluator__c;
+      wrapper.evaluatorName = run.Evaluator__r.Name;
+      wrapper.status = run.Status__c;
+      wrapper.totalEvaluations = Integer.valueOf(run.TotalEvaluations__c != null ? run.TotalEvaluations__c : 0);
+      wrapper.submittedCount = Integer.valueOf(run.SubmittedCount__c != null ? run.SubmittedCount__c : 0);
+      wrapper.flaggedCount = Integer.valueOf(run.FlaggedCount__c != null ? run.FlaggedCount__c : 0);
+      wrapper.percentComplete = run.PercentComplete__c != null ? run.PercentComplete__c : 0;
+      wrapper.lastModifiedDate = run.LastModifiedDate;
+      wrapper.isComplete = wrapper.totalEvaluations > 0 && wrapper.submittedCount >= wrapper.totalEvaluations;
+      results.add(wrapper);
+    }
+
+    return results;
   }
 }
