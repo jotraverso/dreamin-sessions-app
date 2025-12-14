@@ -65,8 +65,8 @@ El archivo `session-mapping.yml` define el mapeo de columnas:
 | Session Abstract         | `Abstract__c`               |
 | First Name and Last Name | `PrimarySpeakerName__c`     |
 | Email address            | `PrimarySpeakerEmail__c`    |
-| Your LinkedIn            | `PrimarySpeakerBio__c`      |
-| Main Role                | `PrimarySpeakerJobTitle__c` |
+| Your LinkedIn            | `PrimarySpeakerLinkedIn__c` |
+| Main Role                | `Category__c`               |
 | Second Speaker info      | `CoSpeakerName__c`          |
 | Second Speaker Email     | `CoSpeakerEmail__c`         |
 | Main Product             | `Product__c`                |
