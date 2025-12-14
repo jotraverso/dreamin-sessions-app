@@ -30,6 +30,10 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>PrimarySpeakerLinkedIn__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Product__c</field>
             </layoutItems>
         </layoutColumns>
