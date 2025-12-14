@@ -1,14 +1,12 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Prevent_Changes_On_Finalized_Run</fullName>
     <active>true</active>
     <description>Prevent any updates to SessionEvaluation records when the parent EvaluatorRun is in Finalized status. This ensures data integrity after finalization.</description>
-    <errorConditionFormula>
-        AND(
+    <errorConditionFormula>AND(
             NOT(ISNEW()),
-            ISPICKVAL(Run__r.Status__c, 'Finalized')
-        )
-    </errorConditionFormula>
-    <errorMessage>Cannot modify evaluations after the run has been finalized.</errorMessage>
+            ISPICKVAL(Run__r.Status__c, &apos;Finalized&apos;)
+        )</errorConditionFormula>
     <errorDisplayField>Run__c</errorDisplayField>
+    <errorMessage>Cannot modify evaluations after the run has been finalized.</errorMessage>
 </ValidationRule>

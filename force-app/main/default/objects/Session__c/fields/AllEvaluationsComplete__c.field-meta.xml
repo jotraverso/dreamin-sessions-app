@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>AllEvaluationsComplete__c</fullName>
     <formula>EvaluationsSubmitted__c = EvaluationsExpected__c &amp;&amp; EvaluationsExpected__c &gt; 0</formula>
