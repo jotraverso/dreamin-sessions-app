@@ -1,0 +1,74 @@
+# Configuración de mapeo de columnas Excel a campos API de Session__c
+# Los nombres de las claves deben coincidir EXACTAMENTE con las columnas del Excel
+
+mapping:
+  # Información de la presentación
+  "Session Title": "Title__c"
+  "Session Abstract (this will appear as the description of your session)": "Abstract__c"
+
+  # Speaker principal
+  "First Name and Last Name": "PrimarySpeakerName__c"
+  "Email address": "PrimarySpeakerEmail__c"
+  "Your LinkedIn": "PrimarySpeakerLinkedIn__c"
+
+  # Categoría de la sesión
+  "Main Role": "Category__c"
+
+  # Speaker secundario
+  "Second Speaker? Please provide the information about the second person that will run the session with you": "CoSpeakerName__c"
+  "Secod Speaker Email, only if you have a second speaker": "CoSpeakerEmail__c"
+
+  # Detalles de la sesión
+  "Main Product": "Product__c"
+  "Session Language Preference": "Language__c"
+  "Session length": "DurationMinutes__c"
+  'Session Level: 1 "Newbies, high level info" to Level 5 "Hardcore technical stuff"': "Level__c"
+
+  # Enlaces y referencias
+  "If so, could you share a link with slides or recording?": "SessionLink__c"
+
+  # Comentarios adicionales
+  "Anything else you would like us to know about this talk?": "SomethingElse__c"
+
+  # Fecha de envío
+  "Timestamp": "SubmissionDateTime__c"
+
+# Configuración de transformaciones especiales
+transformations:
+  # Convertir "30 minutes" o "60 minutes" a números
+  "DurationMinutes__c":
+    type: "duration_to_number"
+    patterns:
+      - regex: "(\\d+)\\s*minutes?"
+        group: 1
+
+  # El nivel ya es un número en el Excel, mantenerlo como está
+  "Level__c":
+    type: "integer"
+
+  # Fecha y hora
+  "SubmissionDateTime__c":
+    type: "datetime"
+    format: "%Y-%m-%d %H:%M:%S"
+
+# Valores por defecto para campos obligatorios no mapeados
+# Campaign__c se pasará como parámetro al script
+defaults:
+  "Status__c": "Draft"
+
+# Campos PII (Personal Identifiable Information) para anonimización
+# Estos campos serán reemplazados por datos ficticios cuando se use --anon
+pii_fields:
+  names:
+    - "PrimarySpeakerName__c"
+    - "CoSpeakerName__c"
+  emails:
+    - "PrimarySpeakerEmail__c"
+    - "CoSpeakerEmail__c"
+  urls:
+    - "PrimarySpeakerLinkedIn__c" # LinkedIn URL
+
+# Configuración de encoding
+encoding:
+  input: "utf-8"
+  output: "utf-8"
