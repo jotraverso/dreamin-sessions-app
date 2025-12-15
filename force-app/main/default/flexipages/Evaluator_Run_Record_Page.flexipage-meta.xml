@@ -34,12 +34,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>sessionQueuePanel</componentName>
-                <identifier>c_sessionQueuePanel</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
                 <componentName>sessionList</componentName>
                 <identifier>c_sessionList</identifier>
             </componentInstance>
@@ -49,6 +43,12 @@
         <type>Region</type>
     </flexiPageRegions>
     <flexiPageRegions>
+        <itemInstances>
+            <componentInstance>
+                <componentName>sessionQueuePanel</componentName>
+                <identifier>c_sessionQueuePanel2</identifier>
+            </componentInstance>
+        </itemInstances>
         <itemInstances>
             <componentInstance>
                 <componentName>force:detailPanel</componentName>
