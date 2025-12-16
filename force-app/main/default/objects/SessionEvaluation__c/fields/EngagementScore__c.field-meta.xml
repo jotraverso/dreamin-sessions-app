@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>EngagementScore__c</fullName>
     <externalId>false</externalId>
+    <inlineHelpText>How interactive and captivating is the session? Consider audience participation, practical examples, and overall interest level. (0-20 points)</inlineHelpText>
     <label>Engagement Score</label>
     <precision>2</precision>
     <required>false</required>

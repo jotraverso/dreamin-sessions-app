@@ -21,17 +21,32 @@
       <div class="scoring-section">
         <div class="slds-form">
           <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label"> <abbr class="slds-required" title="required">* </abbr>Clarity: {clarity} / 20 </label>
+            <div class="slds-form-element__label">
+              <abbr class="slds-required" title="required">* </abbr>Clarity: {clarity} / 20
+              <template if:true={clarityHelpText}>
+                <lightning-helptext content={clarityHelpText} icon-name="utility:info"></lightning-helptext>
+              </template>
+            </div>
             <lightning-slider name="clarity" value={clarity} min="0" max="20" step="1" onchange={handleInput}> </lightning-slider>
           </div>
 
           <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label"> <abbr class="slds-required" title="required">* </abbr>Diversity: {diversity} / 10 </label>
+            <div class="slds-form-element__label">
+              <abbr class="slds-required" title="required">* </abbr>Diversity: {diversity} / 10
+              <template if:true={diversityHelpText}>
+                <lightning-helptext content={diversityHelpText} icon-name="utility:info"></lightning-helptext>
+              </template>
+            </div>
             <lightning-slider name="diversity" value={diversity} min="0" max="10" step="1" onchange={handleInput}> </lightning-slider>
           </div>
 
           <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label"> <abbr class="slds-required" title="required">* </abbr>Engagement: {engagement} / 20 </label>
+            <div class="slds-form-element__label">
+              <abbr class="slds-required" title="required">* </abbr>Engagement: {engagement} / 20
+              <template if:true={engagementHelpText}>
+                <lightning-helptext content={engagementHelpText} icon-name="utility:info"></lightning-helptext>
+              </template>
+            </div>
             <lightning-slider name="engagement" value={engagement} min="0" max="20" step="1" onchange={handleInput}> </lightning-slider>
           </div>
 

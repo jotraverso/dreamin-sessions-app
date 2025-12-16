@@ -2,6 +2,7 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>DiversityScore__c</fullName>
     <externalId>false</externalId>
+    <inlineHelpText>Does the session atract diverse people? Different roles, seniorities, backgrounds, and perspectives should be considered. (0-10 points)</inlineHelpText>
     <label>Diversity Score</label>
     <precision>2</precision>
     <required>false</required>

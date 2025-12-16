@@ -1,4 +1,9 @@
-import { LightningElement, api, track } from "lwc";
+import { LightningElement, api, track, wire } from "lwc";
+import { getObjectInfo } from "lightning/uiObjectInfoApi";
+import SESSION_EVALUATION_OBJECT from "@salesforce/schema/SessionEvaluation__c";
+import CLARITY_FIELD from "@salesforce/schema/SessionEvaluation__c.ClarityScore__c";
+import DIVERSITY_FIELD from "@salesforce/schema/SessionEvaluation__c.DiversityScore__c";
+import ENGAGEMENT_FIELD from "@salesforce/schema/SessionEvaluation__c.EngagementScore__c";
 
 export default class EvaluationForm extends LightningElement {
   @api evaluationId;
@@ -9,7 +14,21 @@ export default class EvaluationForm extends LightningElement {
   @track comments = "";
   @track error;
 
+  clarityHelpText;
+  diversityHelpText;
+  engagementHelpText;
+
   _evaluation;
+
+  @wire(getObjectInfo, { objectApiName: SESSION_EVALUATION_OBJECT })
+  objectInfo({ data }) {
+    if (data) {
+      const fields = data.fields;
+      this.clarityHelpText = fields[CLARITY_FIELD.fieldApiName]?.inlineHelpText || "";
+      this.diversityHelpText = fields[DIVERSITY_FIELD.fieldApiName]?.inlineHelpText || "";
+      this.engagementHelpText = fields[ENGAGEMENT_FIELD.fieldApiName]?.inlineHelpText || "";
+    }
+  }
 
   @api
   get evaluation() {
