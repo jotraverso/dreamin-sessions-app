@@ -56,6 +56,11 @@ transformations:
     type: "truncate"
     max_length: 255
 
+  # Truncar co-speaker nombre a máximo 255 caracteres
+  "CoSpeakerName__c":
+    type: "truncate"
+    max_length: 255
+
 # Valores por defecto para campos obligatorios no mapeados
 # Campaign__c se pasará como parámetro al script
 defaults:
