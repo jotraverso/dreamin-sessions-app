@@ -51,6 +51,11 @@ transformations:
     type: "datetime"
     format: "%Y-%m-%d %H:%M:%S"
 
+  # Truncar URLs a máximo 255 caracteres
+  "SessionLink__c":
+    type: "truncate"
+    max_length: 255
+
 # Valores por defecto para campos obligatorios no mapeados
 # Campaign__c se pasará como parámetro al script
 defaults:

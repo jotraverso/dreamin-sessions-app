@@ -80,6 +80,14 @@ def transform_value(value, field_config):
     elif transform_type == "datetime":
         date_format = field_config.get("format", "%Y-%m-%d %H:%M:%S")
         return transform_datetime(value, date_format)
+    elif transform_type == "truncate":
+        if pd.isna(value) or value == "":
+            return value
+        max_length = field_config.get("max_length", 255)
+        value_str = str(value)
+        if len(value_str) > max_length:
+            return value_str[:max_length]
+        return value_str
 
     return value
 
