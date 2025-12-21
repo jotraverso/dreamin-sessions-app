@@ -24,12 +24,7 @@
         <template if:true={hasEvaluations}>
           <!-- Evaluation Card -->
           <template if:true={currentEvaluation}>
-            <div
-              class="slds-card slds-p-around_medium swipe-container {transitionClass}"
-              ontouchstart={handleTouchStart}
-              ontouchmove={handleTouchMove}
-              ontouchend={handleTouchEnd}
-            >
+            <div class="slds-card slds-p-around_medium swipe-container {transitionClass}">
               <!-- Action Buttons at Top -->
               <div class="slds-grid slds-grid_align-spread slds-m-bottom_medium">
                 <!-- Navigation Buttons (Responsive labels) -->
@@ -55,16 +50,19 @@
                 </div>
               </div>
 
-              <!-- Progress Indicator -->
-              <div class="slds-text-align_center slds-m-bottom_small slds-text-color_weak">
-                Evaluation {currentIndex} of {totalEvaluations}
-                <template if:true={currentEvaluation.Status__c}>
-                  <span class="status-badge">{currentEvaluation.Status__c}</span>
-                </template>
-              </div>
+              <!-- Swipe-enabled Content Region -->
+              <div class="swipe-content" ontouchstart={handleTouchStart} ontouchmove={handleTouchMove} ontouchend={handleTouchEnd}>
+                <!-- Progress Indicator -->
+                <div class="slds-text-align_center slds-m-bottom_small slds-text-color_weak">
+                  Evaluation {currentIndex} of {totalEvaluations}
+                  <template if:true={currentEvaluation.Status__c}>
+                    <span class="status-badge">{currentEvaluation.Status__c}</span>
+                  </template>
+                </div>
 
-              <!-- Evaluation Form Component -->
-              <c-evaluation-form evaluation-id={currentEvaluation.Id} evaluation={currentEvaluation}> </c-evaluation-form>
+                <!-- Evaluation Form Component -->
+                <c-evaluation-form evaluation-id={currentEvaluation.Id} evaluation={currentEvaluation}> </c-evaluation-form>
+              </div>
             </div>
           </template>
         </template>
