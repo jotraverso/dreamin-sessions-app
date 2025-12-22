@@ -31,19 +31,19 @@ export default class SessionDetailsModal extends LightningElement {
   }
 
   get finalScoreDisplay() {
-    return this.session.finalScore ? this.session.finalScore.toFixed(2) : "0.00";
+    return this.session.finalScore ? Number(this.session.finalScore).toFixed(2) : "0.00";
   }
 
   get clarityDisplay() {
-    return this.session.clarityAvg ? this.session.clarityAvg.toFixed(2) : "0.00";
+    return this.session.clarityAvg ? Number(this.session.clarityAvg).toFixed(2) : "0.00";
   }
 
   get contentDisplay() {
-    return this.session.contentAvg ? this.session.contentAvg.toFixed(2) : "0.00";
+    return this.session.contentAvg ? Number(this.session.contentAvg).toFixed(2) : "0.00";
   }
 
   get engagementDisplay() {
-    return this.session.engagementAvg ? this.session.engagementAvg.toFixed(2) : "0.00";
+    return this.session.engagementAvg ? Number(this.session.engagementAvg).toFixed(2) : "0.00";
   }
 
   get categoriesDisplay() {

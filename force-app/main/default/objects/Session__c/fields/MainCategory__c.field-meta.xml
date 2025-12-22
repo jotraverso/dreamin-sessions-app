@@ -9,6 +9,11 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
+                <fullName>Agentforce</fullName>
+                <default>false</default>
+                <label>Agentforce</label>
+            </value>
+            <value>
                 <fullName>Development</fullName>
                 <default>false</default>
                 <label>Development</label>
